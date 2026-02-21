@@ -169,7 +169,7 @@ function exportScore() {
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const logo = new Image();
-  logo.src = "logo.png";
+  logo.src = "logo.PNG";
 
   logo.onload = function() {
 
@@ -207,8 +207,8 @@ function exportScore() {
     // Filename with timestamp
     const safeDate = now.toISOString().replace(/[:.]/g, "-");
     const link = document.createElement("a");
-    link.download = "avispones-final-score-" + safeDate + ".png";
-    link.href = canvas.toDataURL("image/png");
+    link.download = "avispones-final-score-" + safeDate + ".PNG";
+    link.href = canvas.toDataURL("image/PNG");
     link.click();
   };
 
