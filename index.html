@@ -1,199 +1,222 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 <title>Avispones Scoreboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
 body {
   font-family: Arial, sans-serif;
   text-align: center;
+  background: #0b6b3a; /* Green Background */
+  color: white;
   margin: 0;
-  padding: 10px;
+  padding: 20px;
 }
 
 h1 {
   margin-bottom: 10px;
 }
 
+input {
+  padding: 8px;
+  font-size: 18px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+}
+
+.score-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+  flex-wrap: wrap;
+}
+
 .team {
+  background: white;
+  color: #0b6b3a;
   padding: 20px;
-  border-radius: 14px;
-  color: white;
-  margin-bottom: 15px;
+  border-radius: 15px;
+  width: 300px;
+  margin: 10px;
 }
 
 .score {
   font-size: 70px;
-  margin: 10px 0;
+  margin: 20px 0;
 }
 
 button {
+  padding: 10px 15px;
   font-size: 18px;
-  padding: 8px 12px;
   margin: 5px;
+  border-radius: 10px;
   border: none;
-  border-radius: 8px;
+  cursor: pointer;
 }
 
-.controls {
-  margin-top: 15px;
-}
+.add1 { background: #28a745; color: white; }
+.add6 { background: #14532d; color: white; }
+.sub { background: #dc3545; color: white; }
+.export-btn { background: #ffc107; color: black; margin-top: 20px; }
+.reset-btn { background: black; color: white; margin-top: 10px; }
+
 </style>
 </head>
 
 <body>
 
-<h1 id="title">Avispones vs Opponent</h1>
+<h1>🐝 Avispones Scoreboard</h1>
 
-<!-- AVISPONES (TOP) -->
-<div class="team" id="teamA">
-  <h2>Avispones</h2>
-  <input type="color" id="colorA" value="#1e90ff"><br>
-  <div class="score" id="scoreA">0</div>
-  <button id="a6">+6</button>
-  <button id="a1">+1</button>
-  <button id="aMinus">-1</button>
+<div class="score-container">
+
+  <div class="team">
+    <h2>Avispones</h2>
+    <div class="score" id="avisponesScore">0</div>
+    <button class="add1" onclick="updateScore('avispones',1)">+1</button>
+    <button class="add6" onclick="updateScore('avispones',6)">+6</button>
+    <button class="sub" onclick="updateScore('avispones',-1)">-1</button>
+  </div>
+
+  <div class="team">
+    <input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
+    <div class="score" id="opponentScore">0</div>
+    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+    <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+  </div>
+
 </div>
 
-<!-- OPPONENT (BOTTOM) -->
-<div class="team" id="teamB">
-  <input type="text" id="opponentName" value="Opponent"><br>
-  <input type="color" id="colorB" value="#ff4500"><br>
-  <div class="score" id="scoreB">0</div>
-  <button id="b6">+6</button>
-  <button id="b1">+1</button>
-  <button id="bMinus">-1</button>
-</div>
-
-<div class="controls">
-  <button id="reset">Reset Game</button>
-  <button id="saveImage">📸 Save Final Score</button>
-</div>
+<button class="export-btn" onclick="exportScore()">Export Score Image</button>
+<br>
+<button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
 <script>
-let scoreA = 0;
-let scoreB = 0;
 
-const scoreAEl = document.getElementById("scoreA");
-const scoreBEl = document.getElementById("scoreB");
-const opponentInput = document.getElementById("opponentName");
-const titleEl = document.getElementById("title");
+// ---------------- STATE ----------------
 
-function updateScores() {
-  scoreAEl.textContent = scoreA;
-  scoreBEl.textContent = scoreB;
-  updateTitle();
-  saveData();
+let avisponesScore = 0;
+let opponentScore = 0;
+
+// ---------------- LOAD SAVED ----------------
+
+window.onload = function() {
+  const saved = JSON.parse(localStorage.getItem("avisponesGame"));
+
+  if (saved) {
+    avisponesScore = saved.avispones;
+    opponentScore = saved.opponent;
+    document.getElementById("avisponesScore").innerText = avisponesScore;
+    document.getElementById("opponentScore").innerText = opponentScore;
+    document.getElementById("opponentName").value = saved.opponentName;
+  }
+};
+
+// ---------------- SAVE ----------------
+
+function saveState() {
+  const data = {
+    avispones: avisponesScore,
+    opponent: opponentScore,
+    opponentName: document.getElementById("opponentName").value
+  };
+
+  localStorage.setItem("avisponesGame", JSON.stringify(data));
 }
 
-function updateTitle() {
-  titleEl.textContent = "Avispones vs " + opponentInput.value;
+// ---------------- UPDATE SCORE ----------------
+
+function updateScore(team, value) {
+
+  if (team === "avispones") {
+    avisponesScore = Math.max(0, avisponesScore + value);
+    document.getElementById("avisponesScore").innerText = avisponesScore;
+  } else {
+    opponentScore = Math.max(0, opponentScore + value);
+    document.getElementById("opponentScore").innerText = opponentScore;
+  }
+
+  saveState();
 }
 
-function saveData() {
-  localStorage.setItem("scoreA", scoreA);
-  localStorage.setItem("scoreB", scoreB);
-  localStorage.setItem("opponent", opponentInput.value);
-  localStorage.setItem("colorA", document.getElementById("colorA").value);
-  localStorage.setItem("colorB", document.getElementById("colorB").value);
+// ---------------- RESET ----------------
+
+function resetGame() {
+  if (confirm("Reset the game?")) {
+    avisponesScore = 0;
+    opponentScore = 0;
+    document.getElementById("avisponesScore").innerText = 0;
+    document.getElementById("opponentScore").innerText = 0;
+    document.getElementById("opponentName").value = "";
+    localStorage.removeItem("avisponesGame");
+  }
 }
 
-function loadData() {
-  scoreA = parseInt(localStorage.getItem("scoreA")) || 0;
-  scoreB = parseInt(localStorage.getItem("scoreB")) || 0;
-  opponentInput.value = localStorage.getItem("opponent") || "Opponent";
+// ---------------- EXPORT ----------------
 
-  const colorA = localStorage.getItem("colorA") || "#1e90ff";
-  const colorB = localStorage.getItem("colorB") || "#ff4500";
-
-  document.getElementById("colorA").value = colorA;
-  document.getElementById("colorB").value = colorB;
-
-  document.getElementById("teamA").style.backgroundColor = colorA;
-  document.getElementById("teamB").style.backgroundColor = colorB;
-
-  updateScores();
-}
-
-document.getElementById("a6").addEventListener("click", () => { scoreA += 6; updateScores(); });
-document.getElementById("a1").addEventListener("click", () => { scoreA += 1; updateScores(); });
-document.getElementById("aMinus").addEventListener("click", () => { scoreA -= 1; updateScores(); });
-
-document.getElementById("b6").addEventListener("click", () => { scoreB += 6; updateScores(); });
-document.getElementById("b1").addEventListener("click", () => { scoreB += 1; updateScores(); });
-document.getElementById("bMinus").addEventListener("click", () => { scoreB -= 1; updateScores(); });
-
-document.getElementById("reset").addEventListener("click", () => {
-  scoreA = 0;
-  scoreB = 0;
-  opponentInput.value = "Opponent";
-  localStorage.clear();
-  updateScores();
-});
-
-document.getElementById("colorA").addEventListener("input", (e) => {
-  document.getElementById("teamA").style.backgroundColor = e.target.value;
-  saveData();
-});
-
-document.getElementById("colorB").addEventListener("input", (e) => {
-  document.getElementById("teamB").style.backgroundColor = e.target.value;
-  saveData();
-});
-
-opponentInput.addEventListener("input", updateScores);
-
-/* EXPORT IMAGE WITH LOGO ON LEFT */
-document.getElementById("saveImage").addEventListener("click", () => {
+function exportScore() {
 
   const canvas = document.createElement("canvas");
-  canvas.width = 900;
-  canvas.height = 500;
+  canvas.width = 1080;
+  canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#ffffff";
+  // Green Background
+  ctx.fillStyle = "#0b6b3a";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const logo = new Image();
-  logo.crossOrigin = "anonymous";
-  logo.src = "https://clubavispones.mx/images/logos/logo.svg";
+  logo.src = "logo.png";
 
-  logo.onload = function () {
+  logo.onload = function() {
 
-    // Draw logo LEFT
-    ctx.drawImage(logo, 30, 100, 200, 200);
+    // Proportional Logo
+    const desiredWidth = 700;
+    const scale = desiredWidth / logo.width;
+    const newHeight = logo.height * scale;
 
-    ctx.fillStyle = "#000000";
-    ctx.textAlign = "left";
+    const xPosition = (canvas.width - desiredWidth) / 2;
+    const yPosition = 120;
 
-    ctx.font = "bold 42px Arial";
-    ctx.fillText("FINAL", 280, 80);
+    ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
 
-    ctx.font = "bold 56px Arial";
-    ctx.fillText("Avispones   " + scoreA, 280, 180);
-    ctx.fillText(opponentInput.value + "   " + scoreB, 280, 260);
+    // Title
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("FINAL SCORE", 540, 650);
 
-    const today = new Date().toLocaleDateString();
-    ctx.font = "24px Arial";
-    ctx.fillText(today, 280, 340);
+    // Scores
+    ctx.font = "bold 90px Arial";
+    ctx.fillText("AVISPONES " + avisponesScore, 540, 820);
 
+    const opponentName = document.getElementById("opponentName").value || "OPPONENT";
+    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
+
+    // Date + Time Stamp
+    const now = new Date();
+    const formattedDate = now.toLocaleDateString();
+    const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    ctx.font = "40px Arial";
+    ctx.fillText(formattedDate + " • " + formattedTime, 540, 1030);
+
+    // Filename with timestamp
+    const safeDate = now.toISOString().replace(/[:.]/g, "-");
     const link = document.createElement("a");
-    link.download =
-      "Avispones_vs_" +
-      opponentInput.value +
-      "_" +
-      scoreA +
-      "-" +
-      scoreB +
-      ".png";
-
+    link.download = "avispones-final-score-" + safeDate + ".png";
     link.href = canvas.toDataURL("image/png");
     link.click();
   };
-});
 
-loadData();
+  logo.onerror = function() {
+    alert("Logo not found. Make sure logo.png is in the same folder.");
+  };
+}
+
 </script>
 
 </body>
