@@ -17,9 +17,9 @@ body {
 
 h1 { margin-bottom: 10px; }
 
-input {
+input, select {
   padding: 8px;
-  font-size: 18px;
+  font-size: 16px;
   border-radius: 8px;
   border: none;
   text-align: center;
@@ -60,13 +60,36 @@ button {
 .sub { background: #dc3545; color: white; }
 .export-btn { background: #ffc107; color: black; margin-top: 20px; }
 .reset-btn { background: black; color: white; margin-top: 10px; }
-
 </style>
 </head>
 
 <body>
 
 <h1>Avispones Scoreboard</h1>
+
+<!-- MATCH SELECTOR -->
+<div style="margin-bottom:20px;">
+  <select id="jornadaSelect" onchange="handleJornadaChange()">
+    <option value="">Select Match</option>
+    <option>Jornada 1</option>
+    <option>Jornada 2</option>
+    <option>Jornada 3</option>
+    <option>Jornada 4</option>
+    <option>Jornada 5</option>
+    <option>Quarterfinal</option>
+    <option>Semifinal</option>
+    <option>Final</option>
+    <option value="custom">Custom...</option>
+  </select>
+
+  <input 
+    type="text" 
+    id="customJornada" 
+    placeholder="Enter custom match name"
+    style="display:none; margin-left:10px;"
+    oninput="saveState()"
+  >
+</div>
 
 <div class="score-container">
 
@@ -103,9 +126,17 @@ window.onload = function() {
   if (saved) {
     avisponesScore = saved.avispones || 0;
     opponentScore = saved.opponent || 0;
+
     document.getElementById("avisponesScore").textContent = avisponesScore;
     document.getElementById("opponentScore").textContent = opponentScore;
     document.getElementById("opponentName").value = saved.opponentName || "";
+
+    document.getElementById("jornadaSelect").value = saved.jornadaSelect || "";
+    document.getElementById("customJornada").value = saved.customJornada || "";
+
+    if (saved.jornadaSelect === "custom") {
+      document.getElementById("customJornada").style.display = "inline-block";
+    }
   }
 };
 
@@ -114,14 +145,41 @@ function saveState() {
   const data = {
     avispones: avisponesScore,
     opponent: opponentScore,
-    opponentName: document.getElementById("opponentName").value
+    opponentName: document.getElementById("opponentName").value,
+    jornadaSelect: document.getElementById("jornadaSelect").value,
+    customJornada: document.getElementById("customJornada").value
   };
   localStorage.setItem("avisponesGame", JSON.stringify(data));
 }
 
+// HANDLE MATCH SELECT
+function handleJornadaChange() {
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+
+  if (select.value === "custom") {
+    customInput.style.display = "inline-block";
+  } else {
+    customInput.style.display = "none";
+    customInput.value = "";
+  }
+
+  saveState();
+}
+
+function getJornadaText() {
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+
+  if (select.value === "custom") {
+    return customInput.value || "MATCH";
+  }
+
+  return select.value || "MATCH";
+}
+
 // UPDATE SCORE
 function updateScore(team, value) {
-
   if (team === "avispones") {
     avisponesScore = Math.max(0, avisponesScore + value);
     document.getElementById("avisponesScore").textContent = avisponesScore;
@@ -129,7 +187,6 @@ function updateScore(team, value) {
     opponentScore = Math.max(0, opponentScore + value);
     document.getElementById("opponentScore").textContent = opponentScore;
   }
-
   saveState();
 }
 
@@ -141,11 +198,14 @@ function resetGame() {
     document.getElementById("avisponesScore").textContent = 0;
     document.getElementById("opponentScore").textContent = 0;
     document.getElementById("opponentName").value = "";
+    document.getElementById("jornadaSelect").value = "";
+    document.getElementById("customJornada").value = "";
+    document.getElementById("customJornada").style.display = "none";
     localStorage.removeItem("avisponesGame");
   }
 }
 
-// EXPORT WITH SHARE SHEET
+// EXPORT
 function exportScore() {
 
   const canvas = document.createElement("canvas");
@@ -153,27 +213,26 @@ function exportScore() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  // ===== GOLD GRADIENT BACKGROUND =====
+  // GOLD GRADIENT
   const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
-  gradient.addColorStop(0, "#F6D365");   // light gold
-  gradient.addColorStop(0.5, "#D4AF37"); // classic gold
-  gradient.addColorStop(1, "#A67C00");   // deep gold
+  gradient.addColorStop(0, "#F6D365");
+  gradient.addColorStop(0.5, "#D4AF37");
+  gradient.addColorStop(1, "#A67C00");
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 1080, 1080);
 
   const logo = new Image();
-  logo.src = "logo.PNG";
+  logo.src = "logo.png";
 
   logo.onload = function() {
 
     const desiredWidth = 400;
     const scale = desiredWidth / logo.width;
     const newHeight = logo.height * scale;
-
     const xPosition = (1080 - desiredWidth) / 2;
     const yPosition = 120;
 
-    // ===== LOGO SHADOW =====
+    // LOGO SHADOW
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.35)";
     ctx.shadowBlur = 40;
@@ -181,15 +240,18 @@ function exportScore() {
     ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
     ctx.restore();
 
-    // ===== TEXT SETTINGS =====
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    // Title
-    ctx.font = "bold 70px Arial";
-    ctx.fillText("FINAL SCORE", 540, 650);
+    // MATCH LABEL
+    ctx.font = "bold 50px Arial";
+    ctx.fillText(getJornadaText().toUpperCase(), 540, 600);
 
-    // Scores
+    // FINAL SCORE
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("FINAL SCORE", 540, 680);
+
+    // SCORES
     ctx.font = "bold 90px Arial";
     ctx.fillText("AVISPONES " + avisponesScore, 540, 820);
 
@@ -198,18 +260,17 @@ function exportScore() {
 
     ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
 
-    // Date + Time
+    // DATE
     const now = new Date();
-    const formattedDate = now.toLocaleDateString();
-    const formattedTime = now.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-
     ctx.font = "40px Arial";
-    ctx.fillText(formattedDate + " • " + formattedTime, 540, 1030);
+    ctx.fillText(
+      now.toLocaleDateString() + " • " +
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      540,
+      1030
+    );
 
-    // ===== SHARE SHEET EXPORT =====
+    // SHARE SHEET
     canvas.toBlob(async function(blob) {
 
       const file = new File([blob], "avispones-final-score.png", {
@@ -233,7 +294,7 @@ function exportScore() {
   };
 
   logo.onerror = function() {
-    alert("Logo not found. Make sure logo.png is in the same folder.");
+    alert("Make sure logo.png is in the same folder.");
   };
 }
 
