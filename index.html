@@ -23,6 +23,7 @@ input, select {
   border-radius: 8px;
   border: none;
   text-align: center;
+  margin: 5px;
 }
 
 .score-container {
@@ -67,6 +68,16 @@ button {
 
 <h1>Avispones Scoreboard</h1>
 
+<!-- CATEGORY -->
+<div>
+  <input 
+    type="text" 
+    id="categoryName" 
+    placeholder="Category (e.g. U12, Senior, Liga MX)"
+    oninput="saveState()"
+  >
+</div>
+
 <!-- MATCH SELECTOR -->
 <div style="margin-bottom:20px;">
   <select id="jornadaSelect" onchange="handleJornadaChange()">
@@ -86,7 +97,7 @@ button {
     type="text" 
     id="customJornada" 
     placeholder="Enter custom match name"
-    style="display:none; margin-left:10px;"
+    style="display:none;"
     oninput="saveState()"
   >
 </div>
@@ -130,7 +141,7 @@ window.onload = function() {
     document.getElementById("avisponesScore").textContent = avisponesScore;
     document.getElementById("opponentScore").textContent = opponentScore;
     document.getElementById("opponentName").value = saved.opponentName || "";
-
+    document.getElementById("categoryName").value = saved.categoryName || "";
     document.getElementById("jornadaSelect").value = saved.jornadaSelect || "";
     document.getElementById("customJornada").value = saved.customJornada || "";
 
@@ -146,13 +157,13 @@ function saveState() {
     avispones: avisponesScore,
     opponent: opponentScore,
     opponentName: document.getElementById("opponentName").value,
+    categoryName: document.getElementById("categoryName").value,
     jornadaSelect: document.getElementById("jornadaSelect").value,
     customJornada: document.getElementById("customJornada").value
   };
   localStorage.setItem("avisponesGame", JSON.stringify(data));
 }
 
-// HANDLE MATCH SELECT
 function handleJornadaChange() {
   const select = document.getElementById("jornadaSelect");
   const customInput = document.getElementById("customJornada");
@@ -195,13 +206,8 @@ function resetGame() {
   if (confirm("Reset the game?")) {
     avisponesScore = 0;
     opponentScore = 0;
-    document.getElementById("avisponesScore").textContent = 0;
-    document.getElementById("opponentScore").textContent = 0;
-    document.getElementById("opponentName").value = "";
-    document.getElementById("jornadaSelect").value = "";
-    document.getElementById("customJornada").value = "";
-    document.getElementById("customJornada").style.display = "none";
     localStorage.removeItem("avisponesGame");
+    location.reload();
   }
 }
 
@@ -213,7 +219,6 @@ function exportScore() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  // GOLD GRADIENT
   const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
   gradient.addColorStop(0, "#F6D365");
   gradient.addColorStop(0.5, "#D4AF37");
@@ -222,7 +227,7 @@ function exportScore() {
   ctx.fillRect(0, 0, 1080, 1080);
 
   const logo = new Image();
-  logo.src = "logo.PNG"; // UPPERCASE
+  logo.src = "logo.PNG";
 
   logo.onload = function() {
 
@@ -230,35 +235,38 @@ function exportScore() {
     const scale = desiredWidth / logo.width;
     const newHeight = logo.height * scale;
     const xPosition = (1080 - desiredWidth) / 2;
-    const yPosition = 120;
 
-    // LOGO SHADOW
     ctx.save();
     ctx.shadowColor = "rgba(0,0,0,0.35)";
     ctx.shadowBlur = 40;
     ctx.shadowOffsetY = 15;
-    ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
+    ctx.drawImage(logo, xPosition, 120, desiredWidth, newHeight);
     ctx.restore();
 
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    // MATCH LABEL
+    // CATEGORY
+    const category = document.getElementById("categoryName").value || "CATEGORÍA";
+    ctx.font = "bold 45px Arial";
+    ctx.fillText(category.toUpperCase(), 540, 550);
+
+    // JORNADA
     ctx.font = "bold 50px Arial";
-    ctx.fillText(getJornadaText().toUpperCase(), 540, 600);
+    ctx.fillText(getJornadaText().toUpperCase(), 540, 610);
 
     // MARCADOR FINAL
-    ctx.font = "bold 50px Arial";
-    ctx.fillText("MARCADOR FINAL", 540, 680);
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("MARCADOR FINAL", 540, 690);
 
     // SCORES
     ctx.font = "bold 90px Arial";
-    ctx.fillText("AVISPONES " + avisponesScore, 540, 820);
+    ctx.fillText("AVISPONES " + avisponesScore, 540, 830);
 
     const opponentName =
       document.getElementById("opponentName").value || "RIVAL";
 
-    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
+    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 960);
 
     // DATE
     const now = new Date();
@@ -270,7 +278,6 @@ function exportScore() {
       1030
     );
 
-    // SHARE SHEET
     canvas.toBlob(async function(blob) {
 
       const file = new File([blob], "avispones-marcador-final.PNG", {
@@ -293,9 +300,6 @@ function exportScore() {
 
   };
 
-  logo.onerror = function() {
-    alert("Make sure logo.PNG is in the same folder.");
-  };
 }
 
 </script>
