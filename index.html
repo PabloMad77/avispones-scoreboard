@@ -9,15 +9,13 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  background: #0b6b3a; /* Green Background */
+  background: #0b6b3a;
   color: white;
   margin: 0;
   padding: 20px;
 }
 
-h1 {
-  margin-bottom: 10px;
-}
+h1 { margin-bottom: 10px; }
 
 input {
   padding: 8px;
@@ -96,67 +94,58 @@ button {
 
 <script>
 
-// ---------------- STATE ----------------
-
 let avisponesScore = 0;
 let opponentScore = 0;
 
-// ---------------- LOAD SAVED ----------------
-
+// LOAD
 window.onload = function() {
   const saved = JSON.parse(localStorage.getItem("avisponesGame"));
-
   if (saved) {
-    avisponesScore = saved.avispones;
-    opponentScore = saved.opponent;
-    document.getElementById("avisponesScore").innerText = avisponesScore;
-    document.getElementById("opponentScore").innerText = opponentScore;
-    document.getElementById("opponentName").value = saved.opponentName;
+    avisponesScore = saved.avispones || 0;
+    opponentScore = saved.opponent || 0;
+    document.getElementById("avisponesScore").textContent = avisponesScore;
+    document.getElementById("opponentScore").textContent = opponentScore;
+    document.getElementById("opponentName").value = saved.opponentName || "";
   }
 };
 
-// ---------------- SAVE ----------------
-
+// SAVE
 function saveState() {
   const data = {
     avispones: avisponesScore,
     opponent: opponentScore,
     opponentName: document.getElementById("opponentName").value
   };
-
   localStorage.setItem("avisponesGame", JSON.stringify(data));
 }
 
-// ---------------- UPDATE SCORE ----------------
-
+// UPDATE SCORE
 function updateScore(team, value) {
 
   if (team === "avispones") {
     avisponesScore = Math.max(0, avisponesScore + value);
-    document.getElementById("avisponesScore").innerText = avisponesScore;
+    document.getElementById("avisponesScore").textContent = avisponesScore;
   } else {
     opponentScore = Math.max(0, opponentScore + value);
-    document.getElementById("opponentScore").innerText = opponentScore;
+    document.getElementById("opponentScore").textContent = opponentScore;
   }
 
   saveState();
 }
 
-// ---------------- RESET ----------------
-
+// RESET
 function resetGame() {
   if (confirm("Reset the game?")) {
     avisponesScore = 0;
     opponentScore = 0;
-    document.getElementById("avisponesScore").innerText = 0;
-    document.getElementById("opponentScore").innerText = 0;
+    document.getElementById("avisponesScore").textContent = 0;
+    document.getElementById("opponentScore").textContent = 0;
     document.getElementById("opponentName").value = "";
     localStorage.removeItem("avisponesGame");
   }
 }
 
-// ---------------- EXPORT ----------------
-
+// EXPORT WITH SHARE SHEET
 function exportScore() {
 
   const canvas = document.createElement("canvas");
@@ -164,39 +153,36 @@ function exportScore() {
   canvas.height = 1080;
   const ctx = canvas.getContext("2d");
 
-  // Gold Background
+  // Gold background
   ctx.fillStyle = "#D4AF37";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, 1080, 1080);
 
   const logo = new Image();
-  logo.src = "logo.PNG";
+  logo.src = "logo.png";
 
   logo.onload = function() {
 
-    // Proportional Logo
     const desiredWidth = 400;
     const scale = desiredWidth / logo.width;
     const newHeight = logo.height * scale;
 
-    const xPosition = (canvas.width - desiredWidth) / 2;
+    const xPosition = (1080 - desiredWidth) / 2;
     const yPosition = 120;
 
     ctx.drawImage(logo, xPosition, yPosition, desiredWidth, newHeight);
 
-    // Title
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
+
     ctx.font = "bold 70px Arial";
     ctx.fillText("FINAL SCORE", 540, 650);
 
-    // Scores
     ctx.font = "bold 90px Arial";
     ctx.fillText("AVISPONES " + avisponesScore, 540, 820);
 
     const opponentName = document.getElementById("opponentName").value || "OPPONENT";
     ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
 
-    // Date + Time Stamp
     const now = new Date();
     const formattedDate = now.toLocaleDateString();
     const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -204,12 +190,25 @@ function exportScore() {
     ctx.font = "40px Arial";
     ctx.fillText(formattedDate + " • " + formattedTime, 540, 1030);
 
-    // Filename with timestamp
-    const safeDate = now.toISOString().replace(/[:.]/g, "-");
-    const link = document.createElement("a");
-    link.download = "avispones-final-score-" + safeDate + ".PNG";
-    link.href = canvas.toDataURL("image/PNG");
-    link.click();
+    canvas.toBlob(async function(blob) {
+
+      const file = new File([blob], "avispones-final-score.png", {
+        type: "image/png"
+      });
+
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Avispones Final Score"
+        });
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "avispones-final-score.png";
+        link.click();
+      }
+
+    }, "image/png");
   };
 
   logo.onerror = function() {
