@@ -172,10 +172,10 @@ function getJornadaText() {
   const customInput = document.getElementById("customJornada");
 
   if (select.value === "custom") {
-    return customInput.value || "MATCH";
+    return customInput.value || "PARTIDO";
   }
 
-  return select.value || "MATCH";
+  return select.value || "PARTIDO";
 }
 
 // UPDATE SCORE
@@ -222,7 +222,7 @@ function exportScore() {
   ctx.fillRect(0, 0, 1080, 1080);
 
   const logo = new Image();
-  logo.src = "logo.PNG";
+  logo.src = "logo.PNG"; // UPPERCASE
 
   logo.onload = function() {
 
@@ -247,7 +247,7 @@ function exportScore() {
     ctx.font = "bold 50px Arial";
     ctx.fillText(getJornadaText().toUpperCase(), 540, 600);
 
-    // FINAL SCORE
+    // MARCADOR FINAL
     ctx.font = "bold 70px Arial";
     ctx.fillText("MARCADOR FINAL", 540, 680);
 
@@ -256,7 +256,7 @@ function exportScore() {
     ctx.fillText("AVISPONES " + avisponesScore, 540, 820);
 
     const opponentName =
-      document.getElementById("opponentName").value || "OPPONENT";
+      document.getElementById("opponentName").value || "RIVAL";
 
     ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 950);
 
@@ -273,19 +273,19 @@ function exportScore() {
     // SHARE SHEET
     canvas.toBlob(async function(blob) {
 
-      const file = new File([blob], "avispones-final-score.png", {
+      const file = new File([blob], "avispones-marcador-final.PNG", {
         type: "image/png"
       });
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
           files: [file],
-          title: "Avispones Final Score"
+          title: "Avispones Marcador Final"
         });
       } else {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
-        link.download = "avispones-final-score.png";
+        link.download = "avispones-marcador-final.PNG";
         link.click();
       }
 
@@ -294,7 +294,7 @@ function exportScore() {
   };
 
   logo.onerror = function() {
-    alert("Make sure logo.png is in the same folder.");
+    alert("Make sure logo.PNG is in the same folder.");
   };
 }
 
