@@ -6,319 +6,296 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body{
-  font-family:Arial,sans-serif;
-  text-align:center;
-  background:#111000;
-  color:white;
-  margin:0;
-  padding:20px;
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #0b6b3a;
+  color: white;
+  margin: 0;
+  padding: 20px;
 }
 
-h1{margin-bottom:10px;color:#facc15;}
+h1 { margin-bottom: 10px; }
 
-input,select{
-  padding:8px;
-  font-size:18px;
-  border-radius:8px;
-  border:none;
-  text-align:center;
-  margin:5px;
+input, select {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  margin: 5px;
 }
 
-.score-container{
-  display:flex;
-  justify-content:space-around;
-  margin:30px 0;
-  flex-wrap:wrap;
+.score-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+  flex-wrap: wrap;
 }
 
-.team{
-  background:#facc15;
-  color:black;
-  padding:20px;
-  border-radius:15px;
-  width:300px;
-  margin:10px;
+.team {
+  background: white;
+  color: #0b6b3a;
+  padding: 20px;
+  border-radius: 15px;
+  width: 300px;
+  margin: 10px;
 }
 
-.score{
-  font-size:70px;
-  margin:20px 0;
+.score {
+  font-size: 70px;
+  margin: 20px 0;
 }
 
-button{
-  padding:10px 15px;
-  font-size:18px;
-  margin:5px;
-  border-radius:10px;
-  border:none;
-  cursor:pointer;
-  transition:transform 0.08s ease, box-shadow 0.08s ease;
+button {
+  padding: 10px 15px;
+  font-size: 18px;
+  margin: 5px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
 }
 
-button:active{transform:scale(0.92);}
-
-.flash{animation:flashEffect 0.25s ease;}
-
-@keyframes flashEffect{
-  0%{box-shadow:0 0 0 rgba(255,255,255,0);}
-  50%{box-shadow:0 0 20px rgba(255,255,255,0.7);}
-  100%{box-shadow:0 0 0 rgba(255,255,255,0);}
+button:active {
+  transform: scale(0.92);
 }
 
-.add1{background:#16a34a;color:white;}
-.add6{background:#b91c1c;color:white;}
-.sub{background:#dc2626;color:white;}
-.export-btn{background:#facc15;color:black;margin-top:20px;}
-.reset-btn{background:#333;color:white;margin-top:10px;}
-
-.stats-box{
-  margin-top:40px;
-  padding:20px;
-  border:1px solid #444;
-  border-radius:12px;
+.flash {
+  animation: flashEffect 0.25s ease;
 }
+
+@keyframes flashEffect {
+  0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+  50% { box-shadow: 0 0 20px rgba(0,0,0,0.4); }
+  100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
+}
+
+.add1 { background: #28a745; color: white; }
+.add6 { background: #14532d; color: white; }
+.sub { background: #dc3545; color: white; }
+.export-btn { background: #ffc107; color: black; margin-top: 20px; }
+.reset-btn { background: black; color: white; margin-top: 10px; }
 </style>
 </head>
 
 <body>
 
-<h1>🐝 Avispones Scoreboard</h1>
+<h1>Avispones Scoreboard</h1>
 
-<input type="text" id="categoryInput" placeholder="Category (U10, U14...)">
-<input type="text" id="jornadaInput" placeholder="Jornada / Game Week">
+<div>
+  <input type="text" id="categoryName" placeholder="Category (e.g. U12, Senior, Liga MX)" oninput="saveState()">
+</div>
+
+<div style="margin-bottom:20px;">
+  <select id="jornadaSelect" onchange="handleJornadaChange()">
+    <option value="">Select Match</option>
+    <option>Jornada 1</option>
+    <option>Jornada 2</option>
+    <option>Jornada 3</option>
+    <option>Jornada 4</option>
+    <option>Jornada 5</option>
+    <option>Quarterfinal</option>
+    <option>Semifinal</option>
+    <option>Final</option>
+    <option value="custom">Custom...</option>
+  </select>
+
+  <input type="text" id="customJornada" placeholder="Enter custom match name"
+         style="display:none;" oninput="saveState()">
+</div>
 
 <div class="score-container">
 
   <div class="team">
     <h2>Avispones</h2>
-    <div class="score" id="homeScore">0</div>
-    <button class="add1" onclick="updateScore('home',1,this)">+1</button>
-    <button class="add6" onclick="updateScore('home',6,this)">+6</button>
-    <button class="sub" onclick="updateScore('home',-1,this)">-1</button>
+    <div class="score" id="avisponesScore">0</div>
+    <button class="add1" onclick="updateScore('avispones',1,this)">+1</button>
+    <button class="add6" onclick="updateScore('avispones',6,this)">+6</button>
+    <button class="sub" onclick="updateScore('avispones',-1,this)">-1</button>
   </div>
 
   <div class="team">
-    <input type="text" id="opponentName" placeholder="Opponent Name">
-    <div class="score" id="awayScore">0</div>
-    <button class="add1" onclick="updateScore('away',1,this)">+1</button>
-    <button class="add6" onclick="updateScore('away',6,this)">+6</button>
-    <button class="sub" onclick="updateScore('away',-1,this)">-1</button>
+    <input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
+    <div class="score" id="opponentScore">0</div>
+    <button class="add1" onclick="updateScore('opponent',1,this)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6,this)">+6</button>
+    <button class="sub" onclick="updateScore('opponent',-1,this)">-1</button>
   </div>
 
 </div>
 
-<button class="export-btn" onclick="exportScore()">Export Final Score</button>
-<button class="export-btn" onclick="exportStats()">Export Game Stats</button>
+<button class="export-btn" onclick="exportScore()">Export Score Image</button>
 <br>
 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
-<div class="stats-box">
-  <h2>Player Stats (Avispones Only)</h2>
-
-  <input type="text" id="playerName" placeholder="Player Name">
-  <button onclick="addPlayer()">Add Player</button>
-  <br><br>
-
-  <select id="playerSelect"></select>
-
-  <div>
-    <button onclick="addStat('TD',this)">+TD</button>
-    <button onclick="addStat('INT',this)">+INT</button>
-    <button onclick="addStat('SACK',this)">+SACK</button>
-    <button onclick="addStat('XP',this)">+XP</button>
-    <button onclick="addStat('TKL',this)">+TKL</button>
-    <button onclick="addStat('SAF',this)">+SAFETY</button>
-  </div>
-</div>
-
 <script>
 
-let homeScore=0;
-let awayScore=0;
-let stats={};
+let avisponesScore = 0;
+let opponentScore = 0;
 
-function updateScore(team,value,btn){
-  if(team==="home"){
-    homeScore=Math.max(0,homeScore+value);
-    document.getElementById("homeScore").innerText=homeScore;
-  }else{
-    awayScore=Math.max(0,awayScore+value);
-    document.getElementById("awayScore").innerText=awayScore;
+window.onload = function() {
+  const saved = JSON.parse(localStorage.getItem("avisponesGame"));
+  if (saved) {
+    avisponesScore = saved.avispones || 0;
+    opponentScore = saved.opponent || 0;
+
+    document.getElementById("avisponesScore").textContent = avisponesScore;
+    document.getElementById("opponentScore").textContent = opponentScore;
+    document.getElementById("opponentName").value = saved.opponentName || "";
+    document.getElementById("categoryName").value = saved.categoryName || "";
+    document.getElementById("jornadaSelect").value = saved.jornadaSelect || "";
+    document.getElementById("customJornada").value = saved.customJornada || "";
+
+    if (saved.jornadaSelect === "custom") {
+      document.getElementById("customJornada").style.display = "inline-block";
+    }
+  }
+};
+
+function saveState() {
+  const data = {
+    avispones: avisponesScore,
+    opponent: opponentScore,
+    opponentName: document.getElementById("opponentName").value,
+    categoryName: document.getElementById("categoryName").value,
+    jornadaSelect: document.getElementById("jornadaSelect").value,
+    customJornada: document.getElementById("customJornada").value
+  };
+  localStorage.setItem("avisponesGame", JSON.stringify(data));
+}
+
+function handleJornadaChange() {
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+
+  if (select.value === "custom") {
+    customInput.style.display = "inline-block";
+  } else {
+    customInput.style.display = "none";
+    customInput.value = "";
+  }
+  saveState();
+}
+
+function getJornadaText() {
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+
+  if (select.value === "custom") return customInput.value || "PARTIDO";
+  return select.value || "PARTIDO";
+}
+
+function updateScore(team, value, btn) {
+
+  if (team === "avispones") {
+    avisponesScore = Math.max(0, avisponesScore + value);
+    document.getElementById("avisponesScore").textContent = avisponesScore;
+  } else {
+    opponentScore = Math.max(0, opponentScore + value);
+    document.getElementById("opponentScore").textContent = opponentScore;
   }
 
   btn.classList.add("flash");
-  setTimeout(()=>btn.classList.remove("flash"),250);
-  if(navigator.vibrate) navigator.vibrate(40);
+  setTimeout(() => btn.classList.remove("flash"), 250);
+
+  if (navigator.vibrate) navigator.vibrate(40);
+
+  saveState();
 }
 
-function resetGame(){
-  if(confirm("Reset the game?")){
-    homeScore=0;
-    awayScore=0;
-    stats={};
-    document.getElementById("homeScore").innerText=0;
-    document.getElementById("awayScore").innerText=0;
-    document.getElementById("playerSelect").innerHTML="";
+function resetGame() {
+  if (confirm("Reset the game?")) {
+    avisponesScore = 0;
+    opponentScore = 0;
+    localStorage.removeItem("avisponesGame");
+    location.reload();
   }
 }
 
-function addPlayer(){
-  const name=document.getElementById("playerName").value.trim();
-  if(!name||stats[name]) return;
+function exportScore() {
 
-  stats[name]={TD:0,INT:0,SACK:0,XP:0,TKL:0,SAF:0};
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext("2d");
 
-  const option=document.createElement("option");
-  option.value=name;
-  option.text=name;
-  document.getElementById("playerSelect").appendChild(option);
+  const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
+  gradient.addColorStop(0, "#F6D365");
+  gradient.addColorStop(0.5, "#D4AF37");
+  gradient.addColorStop(1, "#A67C00");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 1080, 1080);
 
-  document.getElementById("playerName").value="";
-}
+  const logo = new Image();
+  logo.src = "logo.PNG";
 
-function addStat(type,btn){
-  const player=document.getElementById("playerSelect").value;
-  if(!player) return;
+  logo.onload = function() {
 
-  stats[player][type]++;
+    const desiredWidth = 400;
+    const scale = desiredWidth / logo.width;
+    const newHeight = logo.height * scale;
+    const xPosition = (1080 - desiredWidth) / 2;
 
-  btn.classList.add("flash");
-  setTimeout(()=>btn.classList.remove("flash"),250);
-  if(navigator.vibrate) navigator.vibrate(40);
-}
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 15;
+    ctx.drawImage(logo, xPosition, 120, desiredWidth, newHeight);
+    ctx.restore();
 
-/* ===== SHARE FUNCTION ===== */
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
 
-async function shareCanvas(canvas,fileName){
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
-  const file=new File([blob],fileName,{type:"image/png"});
+    const category = document.getElementById("categoryName").value || "CATEGORÍA";
+    ctx.font = "bold 45px Arial";
+    ctx.fillText(category.toUpperCase(), 540, 550);
 
-  if(navigator.canShare && navigator.canShare({files:[file]})){
-    await navigator.share({files:[file],title:fileName});
-  }else{
-    const link=document.createElement("a");
-    link.download=fileName;
-    link.href=URL.createObjectURL(blob);
-    link.click();
-  }
-}
+    ctx.font = "bold 50px Arial";
+    ctx.fillText(getJornadaText().toUpperCase(), 540, 610);
 
-/* ===== FINAL SCORE EXPORT ===== */
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("MARCADOR FINAL", 540, 690);
 
-function exportScore(){
-  const canvas=document.createElement("canvas");
-  canvas.width=1080;
-  canvas.height=1080;
-  const ctx=canvas.getContext("2d");
+    // NEW: VS LINE (clean addition, no layout change above)
+    const opponentName = document.getElementById("opponentName").value || "RIVAL";
+    ctx.font = "bold 45px Arial";
+    ctx.fillText("VS " + opponentName.toUpperCase(), 540, 750);
 
-  ctx.fillStyle="#111000";
-  ctx.fillRect(0,0,1080,1080);
+    ctx.font = "bold 90px Arial";
+    ctx.fillText("AVISPONES " + avisponesScore, 540, 870);
+    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 970);
 
-  ctx.fillStyle="#facc15";
-  ctx.textAlign="center";
-  ctx.font="bold 70px Arial";
-  ctx.fillText("MARCADOR FINAL",540,400);
+    const now = new Date();
+    ctx.font = "40px Arial";
+    ctx.fillText(
+      now.toLocaleDateString() + " • " +
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      540,
+      1040
+    );
 
-  ctx.font="bold 100px Arial";
-  ctx.fillText("AVISPONES "+homeScore,540,550);
+    canvas.toBlob(async function(blob) {
 
-  const opp=document.getElementById("opponentName").value||"RIVAL";
-  ctx.fillText(opp.toUpperCase()+" "+awayScore,540,680);
+      const file = new File([blob], "avispones-marcador-final.PNG", {
+        type: "image/png"
+      });
 
-  shareCanvas(canvas,"avispones-final-score.PNG");
-}
+      if (navigator.share && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Avispones Marcador Final"
+        });
+      } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = "avispones-marcador-final.PNG";
+        link.click();
+      }
 
-/* ===== STATS EXPORT ===== */
+    }, "image/png");
 
-function exportStats(){
-  const canvas=document.createElement("canvas");
-  canvas.width=1080;
-  canvas.height=1350;
-  const ctx=canvas.getContext("2d");
-
-  ctx.fillStyle="#111000";
-  ctx.fillRect(0,0,1080,1350);
-
-  ctx.fillStyle="#facc15";
-  ctx.textAlign="center";
-
-  ctx.font="bold 65px Arial";
-  ctx.fillText("AVISPONES GAME STATS",540,120);
-
-  const opp=document.getElementById("opponentName").value||"RIVAL";
-  ctx.font="bold 45px Arial";
-  ctx.fillText("vs "+opp.toUpperCase(),540,180);
-
-  const cat=document.getElementById("categoryInput").value||"";
-  const jorn=document.getElementById("jornadaInput").value||"";
-  ctx.font="40px Arial";
-  ctx.fillText(cat.toUpperCase(),540,240);
-  ctx.fillText(jorn.toUpperCase(),540,280);
-
-  let startY=340;
-  const rowHeight=60;
-  const statColWidth=120;
-  const statColumns=["TD","INT","SACK","XP","TKL","SAF"];
-  const players=Object.keys(stats);
-
-  ctx.font="bold 32px Arial";
-
-  let longest=ctx.measureText("PLAYER").width;
-  players.forEach(p=>{
-    const w=ctx.measureText(p.toUpperCase()).width;
-    if(w>longest) longest=w;
-  });
-
-  const playerColWidth=longest+40;
-  const totalWidth=playerColWidth+(statColumns.length*statColWidth);
-  const startX=(1080-totalWidth)/2;
-
-  ctx.strokeStyle="#facc15";
-
-  ctx.strokeRect(startX,startY,playerColWidth,rowHeight);
-  ctx.fillText("PLAYER",startX+playerColWidth/2,startY+40);
-
-  statColumns.forEach((col,i)=>{
-    const x=startX+playerColWidth+(i*statColWidth);
-    ctx.strokeRect(x,startY,statColWidth,rowHeight);
-    ctx.fillText(col,x+statColWidth/2,startY+40);
-  });
-
-  startY+=rowHeight;
-  ctx.font="30px Arial";
-
-  players.forEach((player,index)=>{
-    const y=startY+(index*rowHeight);
-
-    ctx.fillStyle=index%2===0?"#1a1a00":"#222200";
-    ctx.fillRect(startX,y,totalWidth,rowHeight);
-
-    const s=stats[player];
-    const values=[
-      player.toUpperCase(),
-      s.TD||"-",
-      s.INT||"-",
-      s.SACK||"-",
-      s.XP||"-",
-      s.TKL||"-",
-      s.SAF||"-"
-    ];
-
-    values.forEach((val,i)=>{
-      let x,width;
-      if(i===0){ x=startX;width=playerColWidth; }
-      else{ x=startX+playerColWidth+((i-1)*statColWidth); width=statColWidth; }
-
-      ctx.strokeStyle="#facc15";
-      ctx.strokeRect(x,y,width,rowHeight);
-      ctx.fillStyle="#facc15";
-      ctx.fillText(val,x+width/2,y+40);
-    });
-  });
-
-  shareCanvas(canvas,"avispones-game-stats.PNG");
+  };
 }
 
 </script>
