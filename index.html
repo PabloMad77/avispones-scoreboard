@@ -6,74 +6,72 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  background: #0b6b3a;
-  color: white;
-  margin: 0;
-  padding: 20px;
+body{
+  font-family:Arial,sans-serif;
+  text-align:center;
+  background:#0b6b3a;
+  color:white;
+  margin:0;
+  padding:20px;
 }
 
-h1 { margin-bottom: 10px; }
+h1{margin-bottom:10px;}
 
-input, select {
-  padding: 8px;
-  font-size: 16px;
-  border-radius: 8px;
-  border: none;
-  text-align: center;
-  margin: 5px;
+input,select{
+  padding:8px;
+  font-size:16px;
+  border-radius:8px;
+  border:none;
+  text-align:center;
+  margin:5px;
 }
 
-.score-container {
-  display: flex;
-  justify-content: space-around;
-  margin: 30px 0;
-  flex-wrap: wrap;
+.score-container{
+  display:flex;
+  justify-content:space-around;
+  margin:30px 0;
+  flex-wrap:wrap;
 }
 
-.team {
-  background: white;
-  color: #0b6b3a;
-  padding: 20px;
-  border-radius: 15px;
-  width: 300px;
-  margin: 10px;
+.team{
+  background:white;
+  color:#0b6b3a;
+  padding:20px;
+  border-radius:15px;
+  width:300px;
+  margin:10px;
 }
 
-.score {
-  font-size: 70px;
-  margin: 20px 0;
+.score{
+  font-size:70px;
+  margin:20px 0;
 }
 
-button {
-  padding: 10px 15px;
-  font-size: 18px;
-  margin: 5px;
-  border-radius: 10px;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+button{
+  padding:10px 15px;
+  font-size:18px;
+  margin:5px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
+  transition:transform 0.08s ease;
 }
 
-button:active { transform: scale(0.92); }
+button:active{transform:scale(0.92);}
 
-.flash {
-  animation: flashEffect 0.25s ease;
+.flash{animation:flashEffect 0.25s ease;}
+
+@keyframes flashEffect{
+  0%{box-shadow:0 0 0 rgba(0,0,0,0);}
+  50%{box-shadow:0 0 20px rgba(0,0,0,0.4);}
+  100%{box-shadow:0 0 0 rgba(0,0,0,0);}
 }
 
-@keyframes flashEffect {
-  0% { box-shadow: 0 0 0 rgba(0,0,0,0); }
-  50% { box-shadow: 0 0 20px rgba(0,0,0,0.4); }
-  100% { box-shadow: 0 0 0 rgba(0,0,0,0); }
-}
-
-.add1 { background: #28a745; color: white; }
-.add6 { background: #14532d; color: white; }
-.sub { background: #dc3545; color: white; }
-.export-btn { background: #ffc107; color: black; margin-top: 20px; }
-.reset-btn { background: black; color: white; margin-top: 10px; }
+.add1{background:#28a745;color:white;}
+.add6{background:#14532d;color:white;}
+.sub{background:#dc3545;color:white;}
+.export-btn{background:#ffc107;color:black;margin-top:20px;}
+.reset-btn{background:black;color:white;margin-top:10px;}
 
 .stats-box{
   margin-top:40px;
@@ -89,32 +87,7 @@ button:active { transform: scale(0.92); }
 
 <h1>Avispones Scoreboard</h1>
 
-<div>
-  <input type="text" id="categoryName" placeholder="Category" oninput="saveState()">
-</div>
-
-<div style="margin-bottom:20px;">
-  <select id="jornadaSelect" onchange="handleJornadaChange()">
-    <option value="">Select Match</option>
-    <option>Jornada 1</option>
-    <option>Jornada 2</option>
-    <option>Jornada 3</option>
-    <option>Jornada 4</option>
-    <option>Jornada 5</option>
-    <option>Quarterfinal</option>
-    <option>Semifinal</option>
-    <option>Final</option>
-    <option value="custom">Custom...</option>
-  </select>
-
-  <input type="text" id="customJornada"
-         placeholder="Custom match name"
-         style="display:none;"
-         oninput="saveState()">
-</div>
-
 <div class="score-container">
-
   <div class="team">
     <h2>Avispones</h2>
     <div class="score" id="avisponesScore">0</div>
@@ -124,13 +97,12 @@ button:active { transform: scale(0.92); }
   </div>
 
   <div class="team">
-    <input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
+    <input type="text" id="opponentName" placeholder="Opponent Name">
     <div class="score" id="opponentScore">0</div>
     <button class="add1" onclick="updateScore('opponent',1,this)">+1</button>
     <button class="add6" onclick="updateScore('opponent',6,this)">+6</button>
     <button class="sub" onclick="updateScore('opponent',-1,this)">-1</button>
   </div>
-
 </div>
 
 <button class="export-btn" onclick="exportScore()">Export Score Image</button>
@@ -140,13 +112,10 @@ button:active { transform: scale(0.92); }
 
 <div class="stats-box">
   <h2>Player Stats</h2>
-
   <input type="text" id="playerName" placeholder="Player Name">
   <button onclick="addPlayer()">Add Player</button>
   <br><br>
-
   <select id="playerSelect"></select>
-
   <div>
     <button onclick="addStat('TD',this)">+TD</button>
     <button onclick="addStat('INT',this)">+INT</button>
@@ -171,36 +140,79 @@ function updateScore(team,value,btn){
     opponentScore=Math.max(0,opponentScore+value);
     document.getElementById("opponentScore").textContent=opponentScore;
   }
+  animate(btn);
+}
 
+function animate(btn){
   btn.classList.add("flash");
   setTimeout(()=>btn.classList.remove("flash"),250);
   if(navigator.vibrate) navigator.vibrate(40);
 }
 
+function resetGame(){ location.reload(); }
+
 function addPlayer(){
   const name=document.getElementById("playerName").value.trim();
   if(!name||stats[name]) return;
-
   stats[name]={TD:0,INT:0,SACK:0,XP:0,TKL:0,SAF:0};
-
   const option=document.createElement("option");
   option.value=name;
   option.text=name;
   document.getElementById("playerSelect").appendChild(option);
-
   document.getElementById("playerName").value="";
 }
 
 function addStat(type,btn){
   const player=document.getElementById("playerSelect").value;
   if(!player) return;
-
   stats[player][type]++;
-
-  btn.classList.add("flash");
-  setTimeout(()=>btn.classList.remove("flash"),250);
-  if(navigator.vibrate) navigator.vibrate(40);
+  animate(btn);
 }
+
+/* ================= SCORE EXPORT ================= */
+
+function exportScore(){
+
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;
+  canvas.height=1350;
+  const ctx=canvas.getContext("2d");
+
+  const gradient=ctx.createLinearGradient(0,0,0,1350);
+  gradient.addColorStop(0,"#0b6b3a");
+  gradient.addColorStop(1,"#063d21");
+  ctx.fillStyle=gradient;
+  ctx.fillRect(0,0,1080,1350);
+
+  const logo=new Image();
+  logo.src="logo.PNG";
+
+  logo.onload=function(){
+
+    const width=300;
+    const scale=width/logo.width;
+    const height=logo.height*scale;
+    ctx.drawImage(logo,(1080-width)/2,120,width,height);
+
+    ctx.fillStyle="white";
+    ctx.textAlign="center";
+    ctx.font="bold 70px Arial";
+    ctx.fillText("FINAL SCORE",540,550);
+
+    ctx.font="bold 150px Arial";
+    ctx.fillText(avisponesScore,400,850);
+    ctx.fillText(opponentScore,680,850);
+
+    const opponent=document.getElementById("opponentName").value||"RIVAL";
+    ctx.font="bold 50px Arial";
+    ctx.fillText("AVISPONES",400,720);
+    ctx.fillText(opponent.toUpperCase(),680,720);
+
+    downloadCanvas(canvas,"Avispones_Final_Score.png");
+  };
+}
+
+/* ================= STATS EXPORT ================= */
 
 function exportStats(){
 
@@ -211,9 +223,7 @@ function exportStats(){
 
   const gradient=ctx.createLinearGradient(0,0,0,1350);
   gradient.addColorStop(0,"#F6D365");
-  gradient.addColorStop(0.5,"#D4AF37");
   gradient.addColorStop(1,"#A67C00");
-
   ctx.fillStyle=gradient;
   ctx.fillRect(0,0,1080,1350);
 
@@ -222,34 +232,26 @@ function exportStats(){
 
   logo.onload=function(){
 
-    const desiredWidth=400;
-    const scale=desiredWidth/logo.width;
-    const newHeight=logo.height*scale;
-    const xPosition=(1080-desiredWidth)/2;
-
-    ctx.save();
-    ctx.shadowColor="rgba(0,0,0,0.35)";
-    ctx.shadowBlur=40;
-    ctx.shadowOffsetY=15;
-    ctx.drawImage(logo,xPosition,120,desiredWidth,newHeight);
-    ctx.restore();
+    const width=250;
+    const scale=width/logo.width;
+    const height=logo.height*scale;
+    ctx.drawImage(logo,(1080-width)/2,60,width,height);
 
     ctx.fillStyle="white";
     ctx.textAlign="center";
-    ctx.font="bold 60px Arial";
-    ctx.fillText("AVISPONES GAME STATS",540,520);
+    ctx.font="bold 55px Arial";
+    ctx.fillText("AVISPONES GAME STATS",540,350);
 
     const opponent=document.getElementById("opponentName").value||"RIVAL";
-    ctx.font="bold 45px Arial";
-    ctx.fillText("VS "+opponent.toUpperCase(),540,580);
+    ctx.font="bold 40px Arial";
+    ctx.fillText("VS "+opponent.toUpperCase(),540,410);
 
-    let startY=650;
+    let startY=480;
     const rowHeight=60;
     const statCols=["TD","INT","SACK","XP","TKL","SAF"];
     const players=Object.keys(stats);
 
-    ctx.font="bold 32px Arial";
-
+    ctx.font="bold 30px Arial";
     let longest=ctx.measureText("PLAYER").width;
     players.forEach(p=>{
       const w=ctx.measureText(p.toUpperCase()).width;
@@ -261,8 +263,8 @@ function exportStats(){
     const totalWidth=playerWidth+(statCols.length*statWidth);
     const startX=(1080-totalWidth)/2;
 
+    ctx.textAlign="center";
     ctx.strokeStyle="white";
-
     ctx.strokeRect(startX,startY,playerWidth,rowHeight);
     ctx.fillText("PLAYER",startX+playerWidth/2,startY+40);
 
@@ -272,49 +274,49 @@ function exportStats(){
       ctx.fillText(col,x+statWidth/2,startY+40);
     });
 
-    startY+=rowHeight;
-    ctx.font="30px Arial";
+    players.forEach((p,row)=>{
+      const y=startY+((row+1)*rowHeight);
 
-    players.forEach((player,index)=>{
-      const y=startY+(index*rowHeight);
-
-      ctx.fillStyle=index%2===0?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.1)";
+      ctx.fillStyle=row%2===0?"rgba(255,255,255,0.15)":"rgba(0,0,0,0.15)";
       ctx.fillRect(startX,y,totalWidth,rowHeight);
 
-      const s=stats[player];
-      const values=[
-        player.toUpperCase(),
-        s.TD||"-",
-        s.INT||"-",
-        s.SACK||"-",
-        s.XP||"-",
-        s.TKL||"-",
-        s.SAF||"-"
-      ];
+      ctx.strokeRect(startX,y,playerWidth,rowHeight);
+      ctx.fillStyle="white";
+      ctx.fillText(p.toUpperCase(),startX+playerWidth/2,y+40);
 
-      values.forEach((val,i)=>{
-        let x,width;
-        if(i===0){ x=startX;width=playerWidth; }
-        else{ x=startX+playerWidth+((i-1)*statWidth); width=statWidth; }
-
-        ctx.strokeRect(x,y,width,rowHeight);
-        ctx.fillStyle="white";
-        ctx.fillText(val,x+width/2,y+40);
+      statCols.forEach((col,i)=>{
+        const x=startX+playerWidth+(i*statWidth);
+        ctx.strokeRect(x,y,statWidth,rowHeight);
+        const val=stats[p][col];
+        ctx.fillText(val===0?"-":val,x+statWidth/2,y+40);
       });
     });
 
-    canvas.toBlob(async function(blob){
-      const file=new File([blob],"avispones-game-stats.PNG",{type:"image/png"});
-      if(navigator.share&&navigator.canShare({files:[file]})){
-        await navigator.share({files:[file],title:"Avispones Game Stats"});
-      }else{
-        const link=document.createElement("a");
-        link.href=URL.createObjectURL(blob);
-        link.download="avispones-game-stats.PNG";
-        link.click();
-      }
-    },"image/png");
+    downloadCanvas(canvas,"Avispones_Game_Stats.png");
   };
+}
+
+/* ================= DOWNLOAD + SHARE ================= */
+
+function downloadCanvas(canvas,filename){
+
+  canvas.toBlob(function(blob){
+
+    const file=new File([blob],filename,{type:"image/png"});
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({
+        files:[file],
+        title:filename
+      });
+    }else{
+      const link=document.createElement("a");
+      link.download=filename;
+      link.href=URL.createObjectURL(blob);
+      link.click();
+    }
+
+  },"image/png");
 }
 
 </script>
