@@ -143,7 +143,6 @@ button:active { transform: scale(0.92); }
 
   <input type="text" id="playerName" placeholder="Player Name">
   <button onclick="addPlayer()">Add Player</button>
-
   <br><br>
 
   <select id="playerSelect"></select>
@@ -176,7 +175,6 @@ function updateScore(team,value,btn){
   btn.classList.add("flash");
   setTimeout(()=>btn.classList.remove("flash"),250);
   if(navigator.vibrate) navigator.vibrate(40);
-  saveState();
 }
 
 function addPlayer(){
@@ -219,91 +217,106 @@ function exportStats(){
   ctx.fillStyle=gradient;
   ctx.fillRect(0,0,1080,1350);
 
-  ctx.fillStyle="white";
-  ctx.textAlign="center";
-  ctx.font="bold 65px Arial";
-  ctx.fillText("AVISPONES GAME STATS",540,150);
+  const logo=new Image();
+  logo.src="logo.PNG";
 
-  const opponent=document.getElementById("opponentName").value||"RIVAL";
-  ctx.font="bold 45px Arial";
-  ctx.fillText("VS "+opponent.toUpperCase(),540,220);
+  logo.onload=function(){
 
-  let startY=300;
-  const rowHeight=60;
-  const statCols=["TD","INT","SACK","XP","TKL","SAF"];
-  const players=Object.keys(stats);
+    const desiredWidth=400;
+    const scale=desiredWidth/logo.width;
+    const newHeight=logo.height*scale;
+    const xPosition=(1080-desiredWidth)/2;
 
-  ctx.font="bold 32px Arial";
+    ctx.save();
+    ctx.shadowColor="rgba(0,0,0,0.35)";
+    ctx.shadowBlur=40;
+    ctx.shadowOffsetY=15;
+    ctx.drawImage(logo,xPosition,120,desiredWidth,newHeight);
+    ctx.restore();
 
-  let longest=ctx.measureText("PLAYER").width;
-  players.forEach(p=>{
-    const w=ctx.measureText(p.toUpperCase()).width;
-    if(w>longest) longest=w;
-  });
+    ctx.fillStyle="white";
+    ctx.textAlign="center";
+    ctx.font="bold 60px Arial";
+    ctx.fillText("AVISPONES GAME STATS",540,520);
 
-  const playerWidth=longest+40;
-  const statWidth=110;
-  const totalWidth=playerWidth+(statCols.length*statWidth);
-  const startX=(1080-totalWidth)/2;
+    const opponent=document.getElementById("opponentName").value||"RIVAL";
+    ctx.font="bold 45px Arial";
+    ctx.fillText("VS "+opponent.toUpperCase(),540,580);
 
-  ctx.strokeStyle="white";
+    let startY=650;
+    const rowHeight=60;
+    const statCols=["TD","INT","SACK","XP","TKL","SAF"];
+    const players=Object.keys(stats);
 
-  ctx.strokeRect(startX,startY,playerWidth,rowHeight);
-  ctx.fillText("PLAYER",startX+playerWidth/2,startY+40);
+    ctx.font="bold 32px Arial";
 
-  statCols.forEach((col,i)=>{
-    const x=startX+playerWidth+(i*statWidth);
-    ctx.strokeRect(x,startY,statWidth,rowHeight);
-    ctx.fillText(col,x+statWidth/2,startY+40);
-  });
-
-  startY+=rowHeight;
-  ctx.font="30px Arial";
-
-  players.forEach((player,index)=>{
-    const y=startY+(index*rowHeight);
-
-    ctx.fillStyle=index%2===0?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.1)";
-    ctx.fillRect(startX,y,totalWidth,rowHeight);
-
-    const s=stats[player];
-    const values=[
-      player.toUpperCase(),
-      s.TD||"-",
-      s.INT||"-",
-      s.SACK||"-",
-      s.XP||"-",
-      s.TKL||"-",
-      s.SAF||"-"
-    ];
-
-    values.forEach((val,i)=>{
-      let x,width;
-      if(i===0){ x=startX;width=playerWidth; }
-      else{ x=startX+playerWidth+((i-1)*statWidth); width=statWidth; }
-
-      ctx.strokeStyle="white";
-      ctx.strokeRect(x,y,width,rowHeight);
-      ctx.fillStyle="white";
-      ctx.fillText(val,x+width/2,y+40);
+    let longest=ctx.measureText("PLAYER").width;
+    players.forEach(p=>{
+      const w=ctx.measureText(p.toUpperCase()).width;
+      if(w>longest) longest=w;
     });
-  });
 
-  canvas.toBlob(async function(blob){
-    const file=new File([blob],"avispones-game-stats.PNG",{type:"image/png"});
-    if(navigator.share&&navigator.canShare({files:[file]})){
-      await navigator.share({files:[file],title:"Avispones Game Stats"});
-    }else{
-      const link=document.createElement("a");
-      link.href=URL.createObjectURL(blob);
-      link.download="avispones-game-stats.PNG";
-      link.click();
-    }
-  },"image/png");
+    const playerWidth=longest+40;
+    const statWidth=110;
+    const totalWidth=playerWidth+(statCols.length*statWidth);
+    const startX=(1080-totalWidth)/2;
+
+    ctx.strokeStyle="white";
+
+    ctx.strokeRect(startX,startY,playerWidth,rowHeight);
+    ctx.fillText("PLAYER",startX+playerWidth/2,startY+40);
+
+    statCols.forEach((col,i)=>{
+      const x=startX+playerWidth+(i*statWidth);
+      ctx.strokeRect(x,startY,statWidth,rowHeight);
+      ctx.fillText(col,x+statWidth/2,startY+40);
+    });
+
+    startY+=rowHeight;
+    ctx.font="30px Arial";
+
+    players.forEach((player,index)=>{
+      const y=startY+(index*rowHeight);
+
+      ctx.fillStyle=index%2===0?"rgba(255,255,255,0.1)":"rgba(0,0,0,0.1)";
+      ctx.fillRect(startX,y,totalWidth,rowHeight);
+
+      const s=stats[player];
+      const values=[
+        player.toUpperCase(),
+        s.TD||"-",
+        s.INT||"-",
+        s.SACK||"-",
+        s.XP||"-",
+        s.TKL||"-",
+        s.SAF||"-"
+      ];
+
+      values.forEach((val,i)=>{
+        let x,width;
+        if(i===0){ x=startX;width=playerWidth; }
+        else{ x=startX+playerWidth+((i-1)*statWidth); width=statWidth; }
+
+        ctx.strokeRect(x,y,width,rowHeight);
+        ctx.fillStyle="white";
+        ctx.fillText(val,x+width/2,y+40);
+      });
+    });
+
+    canvas.toBlob(async function(blob){
+      const file=new File([blob],"avispones-game-stats.PNG",{type:"image/png"});
+      if(navigator.share&&navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:"Avispones Game Stats"});
+      }else{
+        const link=document.createElement("a");
+        link.href=URL.createObjectURL(blob);
+        link.download="avispones-game-stats.PNG";
+        link.click();
+      }
+    },"image/png");
+  };
 }
 
-/* Your original exportScore function remains EXACTLY unchanged below */
 </script>
-
 </body>
 </html>
