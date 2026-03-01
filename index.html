@@ -318,7 +318,74 @@ function downloadCanvas(canvas,filename){
 
   },"image/png");
 }
+function exportScore(){
 
+  const canvas=document.createElement("canvas");
+  canvas.width=1080;
+  canvas.height=1350;
+  const ctx=canvas.getContext("2d");
+
+  // Background gradient (green theme like scoreboard)
+  const gradient=ctx.createLinearGradient(0,0,0,1350);
+  gradient.addColorStop(0,"#0b6b3a");
+  gradient.addColorStop(1,"#063d21");
+
+  ctx.fillStyle=gradient;
+  ctx.fillRect(0,0,1080,1350);
+
+  ctx.fillStyle="white";
+  ctx.textAlign="center";
+
+  // CATEGORY
+  const category=document.getElementById("categoryName").value||"";
+  ctx.font="bold 55px Arial";
+  ctx.fillText(category.toUpperCase(),540,120);
+
+  // JORNADA
+  let jornada=document.getElementById("jornadaSelect").value;
+  if(jornada==="custom"){
+    jornada=document.getElementById("customJornada").value;
+  }
+  if(jornada){
+    ctx.font="bold 45px Arial";
+    ctx.fillText(jornada.toUpperCase(),540,180);
+  }
+
+  // TITLE
+  ctx.font="bold 70px Arial";
+  ctx.fillText("FINAL SCORE",540,320);
+
+  // TEAM NAMES
+  const opponent=document.getElementById("opponentName").value||"RIVAL";
+
+  ctx.font="bold 55px Arial";
+  ctx.fillText("AVISPONES",320,600);
+  ctx.fillText(opponent.toUpperCase(),760,600);
+
+  // SCORES
+  ctx.font="bold 170px Arial";
+  ctx.fillText(avisponesScore,320,820);
+  ctx.fillText(opponentScore,760,820);
+
+  // Export
+  canvas.toBlob(async function(blob){
+
+    const file=new File([blob],"avispones-final-score.PNG",{type:"image/png"});
+
+    if(navigator.share && navigator.canShare({files:[file]})){
+      await navigator.share({
+        files:[file],
+        title:"Avispones Final Score"
+      });
+    }else{
+      const link=document.createElement("a");
+      link.href=URL.createObjectURL(blob);
+      link.download="avispones-final-score.PNG";
+      link.click();
+    }
+
+  },"image/png");
+}
 </script>
 </body>
 </html>
