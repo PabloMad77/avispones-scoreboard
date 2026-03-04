@@ -61,6 +61,29 @@ button {
 .sub { background: #dc3545; color: white; }
 .export-btn { background: #ffc107; color: black; margin-top: 20px; }
 .reset-btn { background: black; color: white; margin-top: 10px; }
+
+/* PREVIEW MODAL */
+#previewModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
+}
+
+#previewModal img {
+  max-width: 90%;
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.preview-buttons button {
+  font-size: 18px;
+  padding: 12px 20px;
+}
 </style>
 </head>
 
@@ -69,12 +92,9 @@ button {
 <h1>Avispones Scoreboard</h1>
 
 <div>
-  <input 
-    type="text" 
-    id="categoryName" 
+  <input type="text" id="categoryName"
     placeholder="Category (e.g. U12, Senior, Liga MX)"
-    oninput="saveState()"
-  >
+    oninput="saveState()">
 </div>
 
 <div style="margin-bottom:20px;">
@@ -91,17 +111,13 @@ button {
     <option value="custom">Custom...</option>
   </select>
 
-  <input 
-    type="text" 
-    id="customJornada" 
+  <input type="text" id="customJornada"
     placeholder="Enter custom match name"
     style="display:none;"
-    oninput="saveState()"
-  >
+    oninput="saveState()">
 </div>
 
 <div class="score-container">
-
   <div class="team">
     <h2>Avispones</h2>
     <div class="score" id="avisponesScore">0</div>
@@ -111,23 +127,35 @@ button {
   </div>
 
   <div class="team">
-    <input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
+    <input type="text" id="opponentName"
+      placeholder="Opponent Name"
+      oninput="saveState()">
     <div class="score" id="opponentScore">0</div>
     <button class="add1" onclick="updateScore('opponent',1)">+1</button>
     <button class="add6" onclick="updateScore('opponent',6)">+6</button>
     <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
   </div>
-
 </div>
 
 <button class="export-btn" onclick="exportScore()">Export Score Image</button>
 <br>
 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
+<!-- PREVIEW MODAL -->
+<div id="previewModal">
+  <img id="previewImage">
+  <div class="preview-buttons">
+    <button onclick="shareImage()">Share</button>
+    <button onclick="downloadImage()">Download</button>
+    <button onclick="closePreview()">Close</button>
+  </div>
+</div>
+
 <script>
 
 let avisponesScore = 0;
 let opponentScore = 0;
+let generatedBlob = null;
 
 window.onload = function() {
   const saved = JSON.parse(localStorage.getItem("avisponesGame"));
@@ -170,18 +198,13 @@ function handleJornadaChange() {
     customInput.style.display = "none";
     customInput.value = "";
   }
-
   saveState();
 }
 
 function getJornadaText() {
   const select = document.getElementById("jornadaSelect");
   const customInput = document.getElementById("customJornada");
-
-  if (select.value === "custom") {
-    return customInput.value || "PARTIDO";
-  }
-
+  if (select.value === "custom") return customInput.value || "PARTIDO";
   return select.value || "PARTIDO";
 }
 
@@ -239,9 +262,8 @@ function exportScore() {
     ctx.fillStyle = "white";
     ctx.textAlign = "center";
 
-    const category = document.getElementById("categoryName").value || "CATEGORÍA";
     ctx.font = "bold 45px Arial";
-    ctx.fillText(category.toUpperCase(), 540, 550);
+    ctx.fillText((document.getElementById("categoryName").value || "CATEGORÍA").toUpperCase(), 540, 550);
 
     ctx.font = "bold 50px Arial";
     ctx.fillText(getJornadaText().toUpperCase(), 540, 610);
@@ -252,9 +274,7 @@ function exportScore() {
     ctx.font = "bold 90px Arial";
     ctx.fillText("AVISPONES " + avisponesScore, 540, 830);
 
-    const opponentName =
-      document.getElementById("opponentName").value || "RIVAL";
-
+    const opponentName = document.getElementById("opponentName").value || "RIVAL";
     ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 960);
 
     const now = new Date();
@@ -266,31 +286,44 @@ function exportScore() {
       1030
     );
 
-    canvas.toBlob(async function(blob) {
-
-      const file = new File([blob], "avispones-marcador-final.png", {
-        type: "image/png"
-      });
-
-      if (navigator.share) {
-        try {
-          await navigator.share({
-            files: [file],
-            title: "Avispones Marcador Final"
-          });
-          return;
-        } catch (err) {
-          console.log("Share cancelled.");
-        }
-      }
-
+    canvas.toBlob(function(blob) {
+      generatedBlob = blob;
       const url = URL.createObjectURL(blob);
-      window.open(url, "_blank");
-
+      document.getElementById("previewImage").src = url;
+      document.getElementById("previewModal").style.display = "flex";
     }, "image/png");
 
   };
+}
 
+async function shareImage() {
+  if (!generatedBlob) return;
+
+  const file = new File([generatedBlob], "avispones.png", { type: "image/png" });
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: "Avispones Marcador Final"
+      });
+    } catch (err) {
+      console.log("Share cancelled.");
+    }
+  } else {
+    alert("Sharing not supported on this device.");
+  }
+}
+
+function downloadImage() {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(generatedBlob);
+  link.download = "avispones-marcador-final.png";
+  link.click();
+}
+
+function closePreview() {
+  document.getElementById("previewModal").style.display = "none";
 }
 
 </script>
