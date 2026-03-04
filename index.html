@@ -48,7 +48,7 @@ input, select {
 }
 
 button {
-  padding: 10px 15px;
+  padding: 12px 18px;
   font-size: 18px;
   margin: 5px;
   border-radius: 10px;
@@ -82,7 +82,13 @@ button {
 
 .preview-buttons button {
   font-size: 18px;
-  padding: 12px 20px;
+  padding: 14px 22px;
+}
+
+/* Share button more prominent */
+.share-btn {
+  background: #28a745;
+  color: white;
 }
 </style>
 </head>
@@ -145,8 +151,8 @@ button {
 <div id="previewModal">
   <img id="previewImage">
   <div class="preview-buttons">
-    <button onclick="shareImage()">Share</button>
-    <button onclick="downloadImage()">Download</button>
+    <button class="share-btn" onclick="shareImage()">Share</button>
+    <button id="downloadBtn" onclick="downloadImage()">Download</button>
     <button onclick="closePreview()">Close</button>
   </div>
 </div>
@@ -157,7 +163,18 @@ let avisponesScore = 0;
 let opponentScore = 0;
 let generatedBlob = null;
 
+/* Detect iPhone / iPad */
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
 window.onload = function() {
+
+  if (isIOS()) {
+    document.getElementById("downloadBtn").style.display = "none";
+  }
+
   const saved = JSON.parse(localStorage.getItem("avisponesGame"));
   if (saved) {
     avisponesScore = saved.avispones || 0;
@@ -298,7 +315,6 @@ function exportScore() {
 
 async function shareImage() {
   if (!generatedBlob) return;
-
   const file = new File([generatedBlob], "avispones.png", { type: "image/png" });
 
   if (navigator.share) {
@@ -310,8 +326,6 @@ async function shareImage() {
     } catch (err) {
       console.log("Share cancelled.");
     }
-  } else {
-    alert("Sharing not supported on this device.");
   }
 }
 
