@@ -286,52 +286,103 @@ canvas.height=1080;
 
 const ctx=canvas.getContext("2d");
 
-drawField(ctx);
+/* FIELD BACKGROUND */
 
-ctx.fillStyle="rgba(0,0,0,0.75)";
-ctx.fillRect(200,350,680,320);
+ctx.fillStyle="#0b6b3a";
+ctx.fillRect(0,0,1080,1080);
 
+/* yard lines */
+
+ctx.strokeStyle="rgba(255,255,255,0.25)";
+ctx.lineWidth=4;
+
+for(let i=150;i<1080;i+=120){
+ctx.beginPath();
+ctx.moveTo(0,i);
+ctx.lineTo(1080,i);
+ctx.stroke();
+}
+
+/* HEADER */
+
+ctx.textAlign="center";
 ctx.fillStyle="white";
+
+ctx.font="bold 70px Arial";
+ctx.fillText("MARCADOR FINAL",540,180);
+
+ctx.font="40px Arial";
+ctx.fillText(getJornadaText(),540,240);
+
+/* GLOW EFFECT */
+
+ctx.shadowColor="rgba(0,0,0,0.6)";
+ctx.shadowBlur=60;
+ctx.shadowOffsetX=0;
+ctx.shadowOffsetY=20;
+
+/* SCOREBOARD PANEL */
+
+ctx.fillStyle="rgba(0,0,0,0.85)";
+ctx.fillRect(150,320,780,340);
+
+/* reset shadow so text is crisp */
+
+ctx.shadowColor="transparent";
+
+/* divider line */
+
+ctx.strokeStyle="rgba(255,255,255,0.35)";
+ctx.lineWidth=3;
+ctx.beginPath();
+ctx.moveTo(180,490);
+ctx.lineTo(900,490);
+ctx.stroke();
+
+/* TEAM 1 */
+
 ctx.textAlign="left";
+ctx.fillStyle="white";
 
 ctx.font="bold 60px Arial";
-ctx.fillText("AVISPONES",240,450);
+ctx.fillText("AVISPONES",220,440);
 
 ctx.textAlign="right";
-ctx.font="bold 100px Arial";
-ctx.fillText(avisponesScore,840,460);
+ctx.font="bold 120px Arial";
+ctx.fillText(avisponesScore,860,450);
+
+/* TEAM 2 */
 
 const opponentName=document.getElementById("opponentName").value || "RIVAL";
 
 ctx.textAlign="left";
 ctx.font="bold 60px Arial";
-ctx.fillText(opponentName.toUpperCase(),240,560);
+ctx.fillText(opponentName.toUpperCase(),220,600);
 
 ctx.textAlign="right";
-ctx.font="bold 100px Arial";
-ctx.fillText(opponentScore,840,570);
+ctx.font="bold 120px Arial";
+ctx.fillText(opponentScore,860,610);
 
-ctx.textAlign="center";
-ctx.font="bold 50px Arial";
-ctx.fillText("MARCADOR FINAL",540,300);
-
-ctx.font="40px Arial";
-ctx.fillText(getJornadaText(),540,340);
+/* LOGO */
 
 const logo=new Image();
 logo.src="logo.PNG";
 
 logo.onload=function(){
 
-ctx.drawImage(logo,440,720,200,200);
+ctx.drawImage(logo,420,720,240,240);
+
+/* DATE */
 
 const now=new Date();
 
 ctx.font="35px Arial";
+ctx.textAlign="center";
+
 ctx.fillText(
 now.toLocaleDateString()+" • "+now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
 540,
-1030
+1020
 );
 
 canvas.toBlob(function(blob){
