@@ -6,134 +6,90 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-
-body{
-background:#000;
-color:white;
-font-family:Arial;
-text-align:center;
-margin:0;
-padding:20px;
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #0b6b3a;
+  color: white;
+  margin: 0;
+  padding: 20px;
 }
 
-h1{
-color:#facc15;
+h1 { margin-bottom: 10px; }
+
+input, select {
+  padding: 8px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+  text-align: center;
+  margin: 5px;
 }
 
-input{
-padding:8px;
-font-size:16px;
-border-radius:8px;
-border:none;
-text-align:center;
-margin:5px;
+.score-container {
+  display: flex;
+  justify-content: space-around;
+  margin: 30px 0;
+  flex-wrap: wrap;
 }
 
-button{
-background:#facc15;
-color:black;
-padding:10px 15px;
-font-size:18px;
-margin:5px;
-border-radius:10px;
-border:none;
-cursor:pointer;
+.team {
+  background: white;
+  color: #0b6b3a;
+  padding: 20px;
+  border-radius: 15px;
+  width: 300px;
+  margin: 10px;
 }
 
-.score-container{
-display:flex;
-justify-content:space-around;
-margin:30px 0;
-flex-wrap:wrap;
+.score {
+  font-size: 70px;
+  margin: 20px 0;
 }
 
-.team{
-background:#111;
-padding:20px;
-border-radius:15px;
-width:300px;
-margin:10px;
+button {
+  padding: 12px 18px;
+  font-size: 18px;
+  margin: 5px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
 }
 
-.score{
-font-size:70px;
-margin:20px 0;
-color:#facc15;
+.add1 { background: #28a745; color: white; }
+.add6 { background: #14532d; color: white; }
+.sub { background: #dc3545; color: white; }
+.export-btn { background: #ffc107; color: black; margin-top: 20px; }
+.reset-btn { background: black; color: white; margin-top: 10px; }
+
+/* PREVIEW MODAL */
+#previewModal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
 }
 
-.stats-box{
-margin-top:40px;
-padding:20px;
-border:1px solid #333;
-border-radius:12px;
+#previewModal img {
+  max-width: 90%;
+  border-radius: 20px;
+  margin-bottom: 20px;
 }
 
-.export-btn{
-background:#facc15;
-color:black;
-margin-top:15px;
+.preview-buttons button {
+  font-size: 18px;
+  padding: 14px 22px;
 }
 
-.reset-btn{
-background:#444;
-color:white;
-margin-top:10px;
+/* Share button more prominent */
+.share-btn {
+  background: #28a745;
+  color: white;
 }
-
-#playerModal{
-display:none;
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.9);
-justify-content:center;
-align-items:center;
-z-index:1000;
-}
-
-.modal-content{
-background:#111;
-padding:25px;
-border-radius:15px;
-max-height:80vh;
-overflow-y:auto;
-width:320px;
-}
-
-.player-btn{
-width:100%;
-margin:6px 0;
-background:#facc15;
-color:black;
-font-size:18px;
-}
-
-.small-note{
-font-size:12px;
-color:#aaa;
-margin-top:8px;
-}
-
-#previewModal{
-display:none;
-position:fixed;
-inset:0;
-background:black;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-z-index:2000;
-}
-
-#previewModal img{
-width:90%;
-max-width:420px;
-border-radius:10px;
-}
-
-.preview-buttons{
-margin-top:15px;
-}
-
 </style>
 </head>
 
@@ -141,275 +97,521 @@ margin-top:15px;
 
 <h1>Avispones Scoreboard</h1>
 
-<input id="categoryInput" placeholder="Category (U14)">
-<input id="jornadaInput" placeholder="Jornada (3)">
-<br>
+<div>
+<input type="text" id="categoryName"
+placeholder="Category"
+oninput="saveState()">
+  <input type="text" id="categoryName"
+    placeholder="Category (e.g. U12, Senior, Liga MX)"
+    oninput="saveState()">
+</div>
 
-<input id="playerNameInput" placeholder="Add Player Name">
-<button onclick="addPlayer()">Add Player</button>
+<div style="margin-bottom:20px;">
+<select id="jornadaSelect" onchange="handleJornadaChange()">
+<option value="">Select Match</option>
+<option>Jornada 1</option>
+<option>Jornada 2</option>
+<option>Jornada 3</option>
+<option>Jornada 4</option>
+<option>Jornada 5</option>
+<option>Quarterfinal</option>
+<option>Semifinal</option>
+<option>Final</option>
+<option value="custom">Custom...</option>
+</select>
+
+<input type="text" id="customJornada"
+placeholder="Custom match"
+style="display:none;"
+oninput="saveState()">
+  <select id="jornadaSelect" onchange="handleJornadaChange()">
+    <option value="">Select Match</option>
+    <option>Jornada 1</option>
+    <option>Jornada 2</option>
+    <option>Jornada 3</option>
+    <option>Jornada 4</option>
+    <option>Jornada 5</option>
+    <option>Quarterfinal</option>
+    <option>Semifinal</option>
+    <option>Final</option>
+    <option value="custom">Custom...</option>
+  </select>
+
+  <input type="text" id="customJornada"
+    placeholder="Enter custom match name"
+    style="display:none;"
+    oninput="saveState()">
+</div>
 
 <div class="score-container">
-
 <div class="team">
 <h2>Avispones</h2>
 <div class="score" id="avisponesScore">0</div>
-<button onclick="updateScore('avispones',1)">+1</button>
-<button onclick="updateScore('avispones',6)">+6</button>
-<button onclick="updateScore('avispones',-1)">-1</button>
+<button class="add1" onclick="updateScore('avispones',1)">+1</button>
+<button class="add6" onclick="updateScore('avispones',6)">+6</button>
+<button class="sub" onclick="updateScore('avispones',-1)">-1</button>
 </div>
 
 <div class="team">
-<input type="text" id="opponentName" placeholder="Opponent Name">
+<input type="text" id="opponentName"
+placeholder="Opponent Name"
+oninput="saveState()">
 <div class="score" id="opponentScore">0</div>
-<button onclick="updateScore('opponent',1)">+1</button>
-<button onclick="updateScore('opponent',6)">+6</button>
-<button onclick="updateScore('opponent',-1)">-1</button>
+<button class="add1" onclick="updateScore('opponent',1)">+1</button>
+<button class="add6" onclick="updateScore('opponent',6)">+6</button>
+<button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+</div>
+  <div class="team">
+    <h2>Avispones</h2>
+    <div class="score" id="avisponesScore">0</div>
+    <button class="add1" onclick="updateScore('avispones',1)">+1</button>
+    <button class="add6" onclick="updateScore('avispones',6)">+6</button>
+    <button class="sub" onclick="updateScore('avispones',-1)">-1</button>
+  </div>
+
+  <div class="team">
+    <input type="text" id="opponentName"
+      placeholder="Opponent Name"
+      oninput="saveState()">
+    <div class="score" id="opponentScore">0</div>
+    <button class="add1" onclick="updateScore('opponent',1)">+1</button>
+    <button class="add6" onclick="updateScore('opponent',6)">+6</button>
+    <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+  </div>
 </div>
 
-</div>
-
-<div class="stats-box">
-
-<h2>Player Stats</h2>
-
-<button onclick="openPlayerModal('TD')">+TD</button>
-<button onclick="openPlayerModal('INT')">+INT</button>
-<button onclick="openPlayerModal('SACK')">+SACK</button>
-<button onclick="openPlayerModal('XP')">+XP</button>
-<button onclick="openPlayerModal('FLAG')">+FLAG</button>
-<button onclick="openPlayerModal('CATCH')">+CATCH</button>
-<button onclick="openPlayerModal('SAF')">+SAF</button>
-
-</div>
-
-<button class="export-btn" onclick="exportFinalScore()">Export Final Score</button>
-<button class="export-btn" onclick="exportStatsImage()">Export Game Stats</button>
+<button class="export-btn" onclick="exportScore()">Export Score Image</button>
+<br>
 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
-<img id="teamLogo" src="logo.PNG" style="display:none;">
-
-<div id="playerModal">
-<div class="modal-content">
-<h3>Select Player</h3>
-<div id="playerList"></div>
-<div class="small-note">Tap = Add | Long Press = Subtract</div>
-<button onclick="closeModal()">Cancel</button>
-</div>
-</div>
-
+<!-- PREVIEW MODAL -->
 <div id="previewModal">
 <img id="previewImage">
 <div class="preview-buttons">
-<button onclick="shareImage()">Share</button>
-<button onclick="downloadImage()">Save</button>
-<button onclick="closePreview()">Cancel</button>
+<button class="share-btn" onclick="shareImage()">Share</button>
+<button id="downloadBtn" onclick="downloadImage()">Download</button>
+<button onclick="closePreview()">Close</button>
 </div>
+  <img id="previewImage">
+  <div class="preview-buttons">
+    <button class="share-btn" onclick="shareImage()">Share</button>
+    <button id="downloadBtn" onclick="downloadImage()">Download</button>
+    <button onclick="closePreview()">Close</button>
+  </div>
 </div>
 
 <script>
 
-let avisponesScore=0
-let opponentScore=0
-let stats={}
-let selectedStatType=null
-let lastCanvas=null
+let avisponesScore = 0;
+let opponentScore = 0;
+let generatedBlob = null;
 
-function updateScore(team,val){
+/* Detect iPhone / iPad */
+function isIOS() {
+return /iPad|iPhone|iPod/.test(navigator.userAgent)
+|| (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)
+    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
 
-if(team==="avispones"){
-avisponesScore=Math.max(0,avisponesScore+val)
-document.getElementById("avisponesScore").innerText=avisponesScore
-}else{
-opponentScore=Math.max(0,opponentScore+val)
-document.getElementById("opponentScore").innerText=opponentScore
+window.onload = function() {
+
+if (isIOS()) {
+document.getElementById("downloadBtn").style.display = "none";
+}
+
+const saved = JSON.parse(localStorage.getItem("avisponesGame"));
+
+if (saved) {
+avisponesScore = saved.avispones || 0;
+opponentScore = saved.opponent || 0;
+
+document.getElementById("avisponesScore").textContent = avisponesScore;
+document.getElementById("opponentScore").textContent = opponentScore;
+document.getElementById("opponentName").value = saved.opponentName || "";
+document.getElementById("categoryName").value = saved.categoryName || "";
+document.getElementById("jornadaSelect").value = saved.jornadaSelect || "";
+document.getElementById("customJornada").value = saved.customJornada || "";
+
+if (saved.jornadaSelect === "custom") {
+document.getElementById("customJornada").style.display = "inline-block";
+}
+}
+  if (isIOS()) {
+    document.getElementById("downloadBtn").style.display = "none";
+  }
+
+  const saved = JSON.parse(localStorage.getItem("avisponesGame"));
+  if (saved) {
+    avisponesScore = saved.avispones || 0;
+    opponentScore = saved.opponent || 0;
+
+    document.getElementById("avisponesScore").textContent = avisponesScore;
+    document.getElementById("opponentScore").textContent = opponentScore;
+    document.getElementById("opponentName").value = saved.opponentName || "";
+    document.getElementById("categoryName").value = saved.categoryName || "";
+    document.getElementById("jornadaSelect").value = saved.jornadaSelect || "";
+    document.getElementById("customJornada").value = saved.customJornada || "";
+
+    if (saved.jornadaSelect === "custom") {
+      document.getElementById("customJornada").style.display = "inline-block";
+    }
+  }
+};
+
+function saveState() {
+
+const data = {
+avispones: avisponesScore,
+opponent: opponentScore,
+opponentName: document.getElementById("opponentName").value,
+categoryName: document.getElementById("categoryName").value,
+jornadaSelect: document.getElementById("jornadaSelect").value,
+customJornada: document.getElementById("customJornada").value
+};
+
+localStorage.setItem("avisponesGame", JSON.stringify(data));
+
+  const data = {
+    avispones: avisponesScore,
+    opponent: opponentScore,
+    opponentName: document.getElementById("opponentName").value,
+    categoryName: document.getElementById("categoryName").value,
+    jornadaSelect: document.getElementById("jornadaSelect").value,
+    customJornada: document.getElementById("customJornada").value
+  };
+  localStorage.setItem("avisponesGame", JSON.stringify(data));
+}
+
+function handleJornadaChange() {
+
+const select = document.getElementById("jornadaSelect");
+const customInput = document.getElementById("customJornada");
+
+if (select.value === "custom") {
+customInput.style.display = "inline-block";
+} else {
+customInput.style.display = "none";
+customInput.value = "";
+}
+
+saveState();
+
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+
+  if (select.value === "custom") {
+    customInput.style.display = "inline-block";
+  } else {
+    customInput.style.display = "none";
+    customInput.value = "";
+  }
+  saveState();
+}
+
+function getJornadaText() {
+
+const select = document.getElementById("jornadaSelect");
+const customInput = document.getElementById("customJornada");
+
+if (select.value === "custom") return customInput.value || "PARTIDO";
+
+return select.value || "PARTIDO";
+
+  const select = document.getElementById("jornadaSelect");
+  const customInput = document.getElementById("customJornada");
+  if (select.value === "custom") return customInput.value || "PARTIDO";
+  return select.value || "PARTIDO";
+}
+
+function updateScore(team, value) {
+
+if (team === "avispones") {
+avisponesScore = Math.max(0, avisponesScore + value);
+document.getElementById("avisponesScore").textContent = avisponesScore;
+} else {
+opponentScore = Math.max(0, opponentScore + value);
+document.getElementById("opponentScore").textContent = opponentScore;
+}
+
+saveState();
+
+  if (team === "avispones") {
+    avisponesScore = Math.max(0, avisponesScore + value);
+    document.getElementById("avisponesScore").textContent = avisponesScore;
+  } else {
+    opponentScore = Math.max(0, opponentScore + value);
+    document.getElementById("opponentScore").textContent = opponentScore;
+  }
+  saveState();
+}
+
+function resetGame() {
+
+if (confirm("Reset the game?")) {
+
+avisponesScore = 0;
+opponentScore = 0;
+
+localStorage.removeItem("avisponesGame");
+
+location.reload();
+
 }
 
 }
 
-function resetGame(){
+function drawField(ctx){
 
-if(confirm("Reset the game?")){
+ctx.fillStyle="#0b6b3a";
+ctx.fillRect(0,0,1080,1080);
 
-avisponesScore=0
-opponentScore=0
-stats={}
+ctx.strokeStyle="white";
+ctx.lineWidth=6;
 
-document.getElementById("avisponesScore").innerText=0
-document.getElementById("opponentScore").innerText=0
-
+for(let i=200;i<1080;i+=150){
+ctx.beginPath();
+ctx.moveTo(0,i);
+ctx.lineTo(1080,i);
+ctx.stroke();
 }
 
+  if (confirm("Reset the game?")) {
+    avisponesScore = 0;
+    opponentScore = 0;
+    localStorage.removeItem("avisponesGame");
+    location.reload();
+  }
 }
 
-function addPlayer(){
+function exportScore(){
+function exportScore() {
 
-const name=document.getElementById("playerNameInput").value.trim()
+const canvas=document.createElement("canvas");
+canvas.width=1080;
+canvas.height=1080;
+  const canvas = document.createElement("canvas");
+  canvas.width = 1080;
+  canvas.height = 1080;
+  const ctx = canvas.getContext("2d");
 
-if(!name||stats[name]) return
+const ctx=canvas.getContext("2d");
+  const gradient = ctx.createLinearGradient(0, 0, 0, 1080);
+  gradient.addColorStop(0, "#F6D365");
+  gradient.addColorStop(0.5, "#D4AF37");
+  gradient.addColorStop(1, "#A67C00");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 1080, 1080);
 
-stats[name]={TD:0,INT:0,SACK:0,XP:0,FLAG:0,CATCH:0,SAF:0}
+/* FIELD BACKGROUND */
+  const logo = new Image();
+  logo.src = "logo.PNG";
 
-document.getElementById("playerNameInput").value=""
+ctx.fillStyle="#0b6b3a";
+ctx.fillRect(0,0,1080,1080);
+  logo.onload = function() {
 
+/* yard lines */
+    const desiredWidth = 400;
+    const scale = desiredWidth / logo.width;
+    const newHeight = logo.height * scale;
+    const xPosition = (1080 - desiredWidth) / 2;
+
+ctx.strokeStyle="rgba(255,255,255,0.25)";
+ctx.lineWidth=4;
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = 40;
+    ctx.shadowOffsetY = 15;
+    ctx.drawImage(logo, xPosition, 90, desiredWidth, newHeight);
+    ctx.restore();
+
+for(let i=150;i<1080;i+=120){
+ctx.beginPath();
+ctx.moveTo(0,i);
+ctx.lineTo(1080,i);
+ctx.stroke();
 }
 
-function openPlayerModal(statType){
+/* HEADER */
 
-selectedStatType=statType
+ctx.textAlign="center";
+ctx.fillStyle="white";
 
-const modal=document.getElementById("playerModal")
-const list=document.getElementById("playerList")
+ctx.font="bold 70px Arial";
+ctx.fillText("MARCADOR FINAL",540,180);
 
-list.innerHTML=""
+ctx.font="40px Arial";
+ctx.fillText(getJornadaText(),540,240);
 
-Object.keys(stats).forEach(player=>{
+/* GLOW EFFECT */
 
-const btn=document.createElement("button")
-btn.innerText=player
-btn.className="player-btn"
+ctx.shadowColor="rgba(0,0,0,0.6)";
+ctx.shadowBlur=60;
+ctx.shadowOffsetX=0;
+ctx.shadowOffsetY=20;
 
-let pressTimer
+/* SCOREBOARD PANEL */
 
-btn.onclick=()=>{
+ctx.fillStyle="rgba(0,0,0,0.85)";
+ctx.fillRect(150,320,780,340);
 
-stats[player][selectedStatType]++
-closeModal()
+/* reset shadow so text is crisp */
 
+ctx.shadowColor="transparent";
+
+/* divider line */
+
+ctx.strokeStyle="rgba(255,255,255,0.35)";
+ctx.lineWidth=3;
+ctx.beginPath();
+ctx.moveTo(180,490);
+ctx.lineTo(900,490);
+ctx.stroke();
+
+/* TEAM 1 */
+
+ctx.textAlign="left";
+ctx.fillStyle="white";
+
+ctx.font="bold 60px Arial";
+ctx.fillText("AVISPONES",220,440);
+
+ctx.textAlign="right";
+ctx.font="bold 120px Arial";
+ctx.fillText(avisponesScore,860,450);
+
+/* TEAM 2 */
+
+const opponentName=document.getElementById("opponentName").value || "RIVAL";
+
+ctx.textAlign="left";
+ctx.font="bold 60px Arial";
+ctx.fillText(opponentName.toUpperCase(),220,600);
+
+ctx.textAlign="right";
+ctx.font="bold 120px Arial";
+ctx.fillText(opponentScore,860,610);
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+
+/* LOGO */
+    ctx.font = "bold 45px Arial";
+    ctx.fillText((document.getElementById("categoryName").value || "CATEGORÍA").toUpperCase(), 540, 550);
+
+const logo=new Image();
+logo.src="logo.PNG";
+    ctx.font = "bold 50px Arial";
+    ctx.fillText(getJornadaText().toUpperCase(), 540, 610);
+
+logo.onload=function(){
+    ctx.font = "bold 70px Arial";
+    ctx.fillText("MARCADOR FINAL", 540, 690);
+
+ctx.drawImage(logo,420,720,240,240);
+    ctx.font = "bold 90px Arial";
+    ctx.fillText("AVISPONES " + avisponesScore, 540, 830);
+
+/* DATE */
+    const opponentName = document.getElementById("opponentName").value || "RIVAL";
+    ctx.fillText(opponentName.toUpperCase() + " " + opponentScore, 540, 960);
+
+const now=new Date();
+    const now = new Date();
+    ctx.font = "40px Arial";
+    ctx.fillText(
+      now.toLocaleDateString() + " • " +
+      now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      540,
+      1030
+    );
+
+ctx.font="35px Arial";
+ctx.textAlign="center";
+
+ctx.fillText(
+now.toLocaleDateString()+" • "+now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}),
+540,
+1020
+);
+
+canvas.toBlob(function(blob){
+
+generatedBlob=blob;
+
+const url=URL.createObjectURL(blob);
+
+document.getElementById("previewImage").src=url;
+document.getElementById("previewModal").style.display="flex";
+
+});
+    canvas.toBlob(function(blob) {
+      generatedBlob = blob;
+      const url = URL.createObjectURL(blob);
+      document.getElementById("previewImage").src = url;
+      document.getElementById("previewModal").style.display = "flex";
+    }, "image/png");
+
+  };
 }
 
-btn.onmousedown=()=>{
+async function shareImage() {
+  if (!generatedBlob) return;
+  const file = new File([generatedBlob], "avispones.png", { type: "image/png" });
 
-pressTimer=setTimeout(()=>{
-
-stats[player][selectedStatType]=Math.max(0,stats[player][selectedStatType]-1)
-closeModal()
-
-},600)
-
-}
-
-btn.onmouseup=()=>clearTimeout(pressTimer)
-
-btn.ontouchstart=btn.onmousedown
-btn.ontouchend=()=>clearTimeout(pressTimer)
-
-list.appendChild(btn)
-
-})
-
-modal.style.display="flex"
-
-}
-
-function closeModal(){
-document.getElementById("playerModal").style.display="none"
-}
-
-function showPreview(canvas){
-
-lastCanvas=canvas
-
-const img=canvas.toDataURL("image/png")
-
-document.getElementById("previewImage").src=img
-document.getElementById("previewModal").style.display="flex"
-
-}
-
-function closePreview(){
-document.getElementById("previewModal").style.display="none"
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        files: [file],
+        title: "Avispones Marcador Final"
+      });
+    } catch (err) {
+      console.log("Share cancelled.");
+    }
+  }
 }
 
 async function shareImage(){
 
-const blob=await new Promise(r=>lastCanvas.toBlob(r,"image/png"))
-const file=new File([blob],"score.png",{type:"image/png"})
+if(!generatedBlob) return;
 
-if(navigator.canShare && navigator.canShare({files:[file]})){
-navigator.share({files:[file]})
+const file=new File([generatedBlob],"avispones.png",{type:"image/png"});
+
+if(navigator.share){
+
+try{
+await navigator.share({
+files:[file],
+title:"Avispones Marcador Final"
+});
+}catch(err){}
+
+function downloadImage() {
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(generatedBlob);
+  link.download = "avispones-marcador-final.png";
+  link.click();
 }
 
 }
 
 function downloadImage(){
 
-const link=document.createElement("a")
-link.download="score.png"
-link.href=lastCanvas.toDataURL()
-link.click()
+const link=document.createElement("a");
+
+link.href=URL.createObjectURL(generatedBlob);
+link.download="avispones-marcador-final.png";
+
+link.click();
 
 }
 
-function exportFinalScore(){
+function closePreview(){
 
-const canvas=document.createElement("canvas")
-const ctx=canvas.getContext("2d")
+document.getElementById("previewModal").style.display="none";
 
-canvas.width=1080
-canvas.height=1350
-
-ctx.fillStyle="#000"
-ctx.fillRect(0,0,canvas.width,canvas.height)
-
-ctx.fillStyle="#facc15"
-ctx.font="bold 60px Arial"
-ctx.textAlign="center"
-ctx.fillText("FINAL SCORE",540,220)
-
-ctx.fillStyle="white"
-ctx.font="120px Arial"
-ctx.fillText(avisponesScore+" - "+opponentScore,540,650)
-
-showPreview(canvas)
-
-}
-
-function exportStatsImage(){
-
-const players=Object.keys(stats)
-
-if(players.length===0){
-alert("No stats yet")
-return
-}
-
-const canvas=document.createElement("canvas")
-const ctx=canvas.getContext("2d")
-
-canvas.width=1080
-canvas.height=1350
-
-ctx.fillStyle="#000"
-ctx.fillRect(0,0,1080,1350)
-
-ctx.fillStyle="#facc15"
-ctx.font="bold 60px Arial"
-ctx.textAlign="center"
-ctx.fillText("AVISPONES GAME STATS",540,200)
-
-let y=320
-
-ctx.font="28px Arial"
-ctx.fillStyle="white"
-
-players.forEach(p=>{
-
-ctx.fillText(
-p+" TD:"+stats[p].TD+
-" INT:"+stats[p].INT+
-" SACK:"+stats[p].SACK+
-" XP:"+stats[p].XP+
-" FLAG:"+stats[p].FLAG+
-" CATCH:"+stats[p].CATCH+
-" SAF:"+stats[p].SAF
-,540,y)
-
-y+=50
-
-})
-
-showPreview(canvas)
-
+function closePreview() {
+  document.getElementById("previewModal").style.display = "none";
 }
 
 </script>
