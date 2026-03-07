@@ -8,112 +8,71 @@
 <style>
 
 body{
-font-family:Arial,sans-serif;
-text-align:center;
+font-family:Arial;
 background:#0b6b3a;
 color:white;
+text-align:center;
 margin:0;
 padding:20px;
 }
 
-input,select{
-padding:8px;
-font-size:16px;
-border-radius:8px;
-border:none;
-margin:5px;
-text-align:center;
-}
+h2{margin-top:30px;}
 
 button{
-padding:8px 12px;
+padding:12px 18px;
+margin:5px;
+font-size:16px;
 border:none;
-border-radius:8px;
+border-radius:6px;
 cursor:pointer;
-margin:4px;
 }
 
-.score-container{
-display:flex;
-justify-content:center;
-gap:40px;
-flex-wrap:wrap;
-margin:30px 0;
-}
-
-.team{
-background:white;
-color:#0b6b3a;
-padding:20px;
-border-radius:15px;
-width:260px;
-}
-
-.score{
-font-size:70px;
-margin:20px 0;
-}
-
-.add1{background:#28a745;color:white;}
-.add6{background:#14532d;color:white;}
-.sub{background:#dc3545;color:white;}
-
-.export-btn{
-background:#ffc107;
+.statButtons button{
+background:#ffcc00;
 color:black;
+font-weight:bold;
 }
 
-.reset-btn{
-background:black;
-color:white;
-}
-
-/* TABLE */
+.addBtn{background:#007bff;color:white;}
+.delBtn{background:#dc3545;color:white;}
 
 table{
-margin:auto;
+width:100%;
 border-collapse:collapse;
-background:white;
-color:black;
+margin-top:10px;
 }
 
 th,td{
-padding:10px 12px;
-border:1px solid #ddd;
+border:1px solid white;
+padding:10px;
 }
 
-/* MODAL */
+th{
+background:#004d2b;
+}
 
-#playerModal{
+.popup{
 display:none;
 position:fixed;
-inset:0;
+top:0;
+left:0;
+width:100%;
+height:100%;
 background:rgba(0,0,0,0.8);
-justify-content:center;
-align-items:center;
 }
 
-.modal-box{
-background:white;
-color:black;
-padding:30px;
-border-radius:12px;
-width:320px;
-max-height:80vh;
-overflow:auto;
+.popupContent{
+background:#222;
+padding:20px;
+margin:100px auto;
+width:300px;
+border-radius:10px;
 }
 
-.playerRow{
-display:flex;
-justify-content:space-between;
-margin:6px 0;
-}
-
-.deleteBtn{
-background:#dc3545;
-color:white;
-font-size:12px;
-padding:4px 8px;
+.popup button{
+width:100%;
+margin:8px 0;
+font-size:18px;
 }
 
 </style>
@@ -123,351 +82,126 @@ padding:4px 8px;
 
 <h1>Avispones Scoreboard</h1>
 
-<input id="categoryName" placeholder="Category" oninput="saveState()">
+<button class="addBtn" onclick="addPlayer()">Add Player</button>
+<button class="delBtn" onclick="deletePlayer()">Delete Player</button>
 
-<br>
+<h2>Offense</h2>
 
-<select id="jornadaSelect" onchange="handleJornadaChange()">
-<option value="">Select Match</option>
-<option>Jornada 1</option>
-<option>Jornada 2</option>
-<option>Jornada 3</option>
-<option>Jornada 4</option>
-<option>Jornada 5</option>
-<option>Quarterfinal</option>
-<option>Semifinal</option>
-<option>Final</option>
-<option value="custom">Custom...</option>
-</select>
-
-<input id="customJornada" placeholder="Custom match" style="display:none" oninput="saveState()">
-
-<div class="score-container">
-
-<div class="team">
-<h2>Avispones</h2>
-
-<div id="avisponesScore" class="score">0</div>
-
-<button class="add1" onclick="updateScore('avispones',1)">+1</button>
-<button class="add6" onclick="updateScore('avispones',6)">+6</button>
-<button class="sub" onclick="updateScore('avispones',-1)">-1</button>
-
+<div class="statButtons">
+<button onclick="openPopup('TD','offense')">+ TD</button>
+<button onclick="openPopup('CATCH','offense')">+ CATCH</button>
+<button onclick="openPopup('XP','offense')">+ XP</button>
 </div>
 
-<div class="team">
-
-<input id="opponentName" placeholder="Opponent" oninput="saveState()">
-
-<div id="opponentScore" class="score">0</div>
-
-<button class="add1" onclick="updateScore('opponent',1)">+1</button>
-<button class="add6" onclick="updateScore('opponent',6)">+6</button>
-<button class="sub" onclick="updateScore('opponent',-1)">-1</button>
-
-</div>
-
-</div>
-
-<button class="export-btn" onclick="exportScore()">Export Score Image</button>
-<br>
-<button class="reset-btn" onclick="resetGame()">Reset Game</button>
-
-<hr style="margin:40px 0">
-
-<h2>Avispones Player Stats</h2>
-
-<button onclick="openPlayerModal()">Manage Players</button>
-
-<h3>Offense</h3>
-
-<table>
-<thead>
+<table id="offenseTable">
 <tr>
 <th>Player</th>
 <th>TD</th>
-<th>Catch</th>
+<th>CATCH</th>
 <th>XP</th>
 </tr>
-</thead>
-
-<tbody id="offenseTable"></tbody>
 </table>
 
-<h3 style="margin-top:30px;">Defense</h3>
+<h2>Defense</h2>
 
-<table>
-<thead>
+<div class="statButtons">
+<button onclick="openPopup('INT','defense')">+ INT</button>
+<button onclick="openPopup('FLAG','defense')">+ FLAG</button>
+<button onclick="openPopup('SACK','defense')">+ SACK</button>
+<button onclick="openPopup('TD','defense')">+ TD</button>
+</div>
+
+<table id="defenseTable">
 <tr>
 <th>Player</th>
 <th>INT</th>
-<th>Flag</th>
+<th>FLAG</th>
+<th>SACK</th>
 <th>TD</th>
 </tr>
-</thead>
-
-<tbody id="defenseTable"></tbody>
 </table>
 
-<!-- PLAYER MODAL -->
-
-<div id="playerModal">
-
-<div class="modal-box">
-
-<h3>Add Player</h3>
-
-<input id="playerName" placeholder="Player name">
-
-<br>
-
-<select id="playerUnit">
-<option value="offense">Offense</option>
-<option value="defense">Defense</option>
-</select>
-
-<br>
-
-<button onclick="addPlayer()">Add Player</button>
-
-<hr>
-
-<h3>Current Players</h3>
-
-<div id="playerList"></div>
-
-<br>
-
-<button onclick="closePlayerModal()">Close</button>
-
+<div class="popup" id="playerPopup">
+<div class="popupContent">
+<h3>Select Player</h3>
+<div id="playerButtons"></div>
+<button onclick="closePopup()">Cancel</button>
 </div>
-
 </div>
 
 <script>
 
-/* SCORE SYSTEM */
-
-let avisponesScore=0
-let opponentScore=0
-
-function updateScore(team,val){
-
-if(team==="avispones"){
-avisponesScore=Math.max(0,avisponesScore+val)
-document.getElementById("avisponesScore").textContent=avisponesScore
-}else{
-opponentScore=Math.max(0,opponentScore+val)
-document.getElementById("opponentScore").textContent=opponentScore
-}
-
-saveState()
-
-}
-
-/* SAVE GAME */
-
-function saveState(){
-
-const data={
-avispones:avisponesScore,
-opponent:opponentScore,
-opponentName:document.getElementById("opponentName").value,
-categoryName:document.getElementById("categoryName").value
-}
-
-localStorage.setItem("avisponesGame",JSON.stringify(data))
-
-}
-
-/* RESET */
-
-function resetGame(){
-
-if(confirm("Reset game?")){
-
-localStorage.removeItem("avisponesGame")
-localStorage.removeItem("avisponesPlayers")
-
-location.reload()
-
-}
-
-}
-
-/* PLAYER SYSTEM */
-
-let players=JSON.parse(localStorage.getItem("avisponesPlayers"))||[]
-
-function openPlayerModal(){
-
-document.getElementById("playerModal").style.display="flex"
-
-renderPlayerList()
-
-}
-
-function closePlayerModal(){
-
-document.getElementById("playerModal").style.display="none"
-
-}
+let players = []
+let selectedStat = ""
+let selectedSide = ""
 
 function addPlayer(){
 
-const name=document.getElementById("playerName").value.trim()
-const unit=document.getElementById("playerUnit").value
+let name = prompt("Player name")
 
-if(!name)return
+if(!name) return
 
-players.push({
-id:Date.now(),
-name:name,
-unit:unit,
-td:0,
-catch:0,
-xp:0,
-int:0,
-flag:0
-})
+let side = prompt("Type offense or defense")
 
-document.getElementById("playerName").value=""
+side = side.toLowerCase()
 
-savePlayers()
+let player = {name:name,side:side,TD:0,CATCH:0,XP:0,INT:0,FLAG:0,SACK:0}
 
-renderPlayers()
+players.push(player)
 
-renderPlayerList()
+renderTables()
 
 }
 
-function deletePlayer(id){
+function deletePlayer(){
 
-players=players.filter(p=>p.id!==id)
+let name = prompt("Player name to delete")
 
-savePlayers()
+players = players.filter(p=>p.name!==name)
 
-renderPlayers()
-
-renderPlayerList()
+renderTables()
 
 }
 
-function savePlayers(){
+function renderTables(){
 
-localStorage.setItem("avisponesPlayers",JSON.stringify(players))
+let offenseTable = document.getElementById("offenseTable")
+let defenseTable = document.getElementById("defenseTable")
 
-}
+offenseTable.innerHTML =
+"<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>"
 
-function renderPlayerList(){
+defenseTable.innerHTML =
+"<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>"
 
-const list=document.getElementById("playerList")
+players.forEach((p,i)=>{
 
-list.innerHTML=""
+if(p.side==="offense"){
 
-players.forEach(p=>{
+let row = offenseTable.insertRow()
 
-list.innerHTML+=`
+row.insertCell(0).innerText = p.name
 
-<div class="playerRow">
+row.insertCell(1).innerText = p.TD
+row.insertCell(2).innerText = p.CATCH
+row.insertCell(3).innerText = p.XP
 
-<span>${p.name} (${p.unit})</span>
-
-<button class="deleteBtn" onclick="deletePlayer(${p.id})">Delete</button>
-
-</div>
-
-`
-
-})
+addLongPress(row, p)
 
 }
 
-/* STATS */
+if(p.side==="defense"){
 
-function updateStat(id,stat,val){
+let row = defenseTable.insertRow()
 
-const player=players.find(p=>p.id===id)
+row.insertCell(0).innerText = p.name
 
-player[stat]=Math.max(0,(player[stat]||0)+val)
+row.insertCell(1).innerText = p.INT
+row.insertCell(2).innerText = p.FLAG
+row.insertCell(3).innerText = p.SACK
+row.insertCell(4).innerText = p.TD
 
-savePlayers()
-
-renderPlayers()
-
-}
-
-function renderPlayers(){
-
-const offense=document.getElementById("offenseTable")
-const defense=document.getElementById("defenseTable")
-
-offense.innerHTML=""
-defense.innerHTML=""
-
-players.forEach(p=>{
-
-if(p.unit==="offense"){
-
-offense.innerHTML+=`
-
-<tr>
-
-<td>${p.name}</td>
-
-<td>
-${p.td}
-<button onclick="updateStat(${p.id},'td',1)">+</button>
-<button onclick="updateStat(${p.id},'td',-1)">-</button>
-</td>
-
-<td>
-${p.catch}
-<button onclick="updateStat(${p.id},'catch',1)">+</button>
-<button onclick="updateStat(${p.id},'catch',-1)">-</button>
-</td>
-
-<td>
-${p.xp}
-<button onclick="updateStat(${p.id},'xp',1)">+</button>
-<button onclick="updateStat(${p.id},'xp',-1)">-</button>
-</td>
-
-</tr>
-
-`
-
-}
-
-if(p.unit==="defense"){
-
-defense.innerHTML+=`
-
-<tr>
-
-<td>${p.name}</td>
-
-<td>
-${p.int}
-<button onclick="updateStat(${p.id},'int',1)">+</button>
-<button onclick="updateStat(${p.id},'int',-1)">-</button>
-</td>
-
-<td>
-${p.flag}
-<button onclick="updateStat(${p.id},'flag',1)">+</button>
-<button onclick="updateStat(${p.id},'flag',-1)">-</button>
-</td>
-
-<td>
-${p.td}
-<button onclick="updateStat(${p.id},'td',1)">+</button>
-<button onclick="updateStat(${p.id},'td',-1)">-</button>
-</td>
-
-</tr>
-
-`
+addLongPress(row, p)
 
 }
 
@@ -475,43 +209,75 @@ ${p.td}
 
 }
 
-/* EXPORT */
+function openPopup(stat,side){
 
-function exportScore(){
+selectedStat = stat
+selectedSide = side
 
-const canvas=document.createElement("canvas")
-canvas.width=1080
-canvas.height=1080
+let container = document.getElementById("playerButtons")
+container.innerHTML = ""
 
-const ctx=canvas.getContext("2d")
+players.forEach((p,i)=>{
 
-ctx.fillStyle="#D4AF37"
-ctx.fillRect(0,0,1080,1080)
+if(p.side===side){
 
-ctx.fillStyle="white"
-ctx.textAlign="center"
+let btn = document.createElement("button")
+btn.innerText = p.name
 
-ctx.font="bold 80px Arial"
-ctx.fillText("AVISPONES "+avisponesScore,540,500)
+btn.onclick = function(){
+players[i][stat]++
+renderTables()
+closePopup()
+}
 
-const opponent=document.getElementById("opponentName").value||"RIVAL"
+container.appendChild(btn)
 
-ctx.fillText(opponent+" "+opponentScore,540,620)
+}
 
-canvas.toBlob(function(blob){
+})
 
-const url=URL.createObjectURL(blob)
+document.getElementById("playerPopup").style.display="block"
 
-const link=document.createElement("a")
-link.href=url
-link.download="avispones-score.png"
-link.click()
+}
+
+function closePopup(){
+document.getElementById("playerPopup").style.display="none"
+}
+
+function addLongPress(row, player){
+
+let cells = row.querySelectorAll("td")
+
+cells.forEach((cell,index)=>{
+
+if(index===0) return
+
+let timer
+
+cell.addEventListener("touchstart",function(){
+
+timer = setTimeout(()=>{
+
+let stat = row.parentElement.rows[0].cells[index].innerText
+
+if(player[stat] > 0){
+
+player[stat]--
+renderTables()
+
+}
+
+},600)
+
+})
+
+cell.addEventListener("touchend",function(){
+clearTimeout(timer)
+})
 
 })
 
 }
-
-renderPlayers()
 
 </script>
 
