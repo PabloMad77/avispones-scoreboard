@@ -16,77 +16,86 @@ margin:0;
 padding:20px;
 }
 
-h2{margin-top:30px;}
+input,select{
+padding:8px;
+font-size:16px;
+border-radius:8px;
+border:none;
+margin:5px;
+text-align:center;
+}
+
+.score-container{
+display:flex;
+justify-content:space-around;
+margin:30px 0;
+flex-wrap:wrap;
+}
+
+.team{
+background:white;
+color:#0b6b3a;
+padding:20px;
+border-radius:15px;
+width:300px;
+margin:10px;
+}
+
+.score{
+font-size:70px;
+margin:20px 0;
+}
 
 button{
 padding:14px 20px;
+font-size:18px;
 margin:6px;
-font-size:17px;
+border-radius:10px;
 border:none;
-border-radius:8px;
 cursor:pointer;
 }
 
-.statButtons button{
-background:#ffcc00;
+.add1{background:#28a745;color:white;}
+.add6{background:#14532d;color:white;}
+.sub{background:#dc3545;color:white;}
+
+.export-btn{background:#ffc107;color:black;margin-top:20px;}
+.reset-btn{background:black;color:white;margin-top:10px;}
+
+.stat-btn{
+background:#ffd000;
 color:black;
 font-weight:bold;
+font-size:22px;
+padding:16px 20px;
+margin:8px;
 }
 
-.addBtn{background:#007bff;color:white;}
-.delBtn{background:#dc3545;color:white;}
-
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:10px;
-}
-
-th,td{
-border:1px solid white;
+.player{
+background:white;
+color:black;
 padding:12px;
-font-size:16px;
+margin:6px auto;
+width:260px;
+border-radius:10px;
+font-size:20px;
 }
 
-th{
-background:#004d2b;
-}
-
-.popup{
+.modal{
 display:none;
 position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
+inset:0;
 background:rgba(0,0,0,0.8);
+justify-content:center;
+align-items:center;
+z-index:9999;
 }
 
-.popupContent{
-background:#222;
-padding:20px;
-margin:80px auto;
-width:320px;
-border-radius:10px;
-}
-
-.popup input{
-width:90%;
-padding:10px;
-margin:10px 0;
-font-size:16px;
-}
-
-.popup select{
-width:95%;
-padding:10px;
-font-size:16px;
-margin-bottom:10px;
-}
-
-.popup button{
-width:100%;
-margin-top:8px;
+.modal-box{
+background:white;
+color:black;
+padding:30px;
+border-radius:14px;
 }
 
 </style>
@@ -96,273 +105,308 @@ margin-top:8px;
 
 <h1>Avispones Scoreboard</h1>
 
-<button class="addBtn" onclick="openAddPlayer()">Add Player</button>
-<button class="delBtn" onclick="openDeletePlayer()">Delete Player</button>
+<input id="categoryName" placeholder="Category">
 
-<h2>Offense</h2>
+<div class="score-container">
 
-<div class="statButtons">
-<button onclick="openStatPopup('TD','offense')">+ TD</button>
-<button onclick="openStatPopup('CATCH','offense')">+ CATCH</button>
-<button onclick="openStatPopup('XP','offense')">+ XP</button>
+<div class="team">
+<h2>Avispones</h2>
+<div class="score" id="avisponesScore">0</div>
+<button class="add1" onclick="updateScore('avispones',1)">+1</button>
+<button class="add6" onclick="updateScore('avispones',6)">+6</button>
+<button class="sub" onclick="updateScore('avispones',-1)">-1</button>
 </div>
 
-<table id="offenseTable">
-<tr>
-<th>Player</th>
-<th>TD</th>
-<th>CATCH</th>
-<th>XP</th>
-</tr>
-</table>
-
-<h2>Defense</h2>
-
-<div class="statButtons">
-<button onclick="openStatPopup('INT','defense')">+ INT</button>
-<button onclick="openStatPopup('FLAG','defense')">+ FLAG</button>
-<button onclick="openStatPopup('SACK','defense')">+ SACK</button>
-<button onclick="openStatPopup('TD','defense')">+ TD</button>
+<div class="team">
+<input id="opponentName" placeholder="Opponent">
+<div class="score" id="opponentScore">0</div>
+<button class="add1" onclick="updateScore('opponent',1)">+1</button>
+<button class="add6" onclick="updateScore('opponent',6)">+6</button>
+<button class="sub" onclick="updateScore('opponent',-1)">-1</button>
 </div>
 
-<table id="defenseTable">
-<tr>
-<th>Player</th>
-<th>INT</th>
-<th>FLAG</th>
-<th>SACK</th>
-<th>TD</th>
-</tr>
-</table>
+</div>
+
+<button class="export-btn">Export Score Image</button>
+<br>
+<button class="reset-btn" onclick="resetGame()">Reset Game</button>
+
+<hr style="margin:40px 0">
+
+<h2>Avispones Player Stats</h2>
+
+<button onclick="openPlayerManager()">Manage Players</button>
+
+<h3>Offense</h3>
+
+<div>
+<button class="stat-btn" onclick="openStat('td','offense')">TD</button>
+<button class="stat-btn" onclick="openStat('catch','offense')">CATCH</button>
+<button class="stat-btn" onclick="openStat('xp','offense')">XP</button>
+</div>
+
+<div id="offensePlayers"></div>
+
+<h3>Defense</h3>
+
+<div>
+<button class="stat-btn" onclick="openStat('int','defense')">INT</button>
+<button class="stat-btn" onclick="openStat('flag','defense')">FLAG</button>
+<button class="stat-btn" onclick="openStat('sack','defense')">SACK</button>
+<button class="stat-btn" onclick="openStat('td','defense')">TD</button>
+</div>
+
+<div id="defensePlayers"></div>
 
 
-<!-- ADD PLAYER POPUP -->
+<!-- PLAYER MANAGER -->
 
-<div class="popup" id="addPopup">
-<div class="popupContent">
+<div class="modal" id="playerManager">
+<div class="modal-box">
 
-<h3>Add Player</h3>
+<h2>Players</h2>
 
-<input id="playerName" placeholder="Player name">
+<input id="newPlayerName" placeholder="Player Name">
 
-<select id="playerSide">
+<select id="newPlayerUnit">
 <option value="offense">Offense</option>
 <option value="defense">Defense</option>
 </select>
 
+<br><br>
+
 <button onclick="addPlayer()">Add Player</button>
-<button onclick="closePopup()">Cancel</button>
+
+<hr>
+
+<div id="playerList"></div>
+
+<br>
+
+<button onclick="closePlayerManager()">Close</button>
 
 </div>
 </div>
 
 
-<!-- DELETE PLAYER POPUP -->
+<!-- STAT SELECT -->
 
-<div class="popup" id="deletePopup">
-<div class="popupContent">
+<div class="modal" id="statModal">
+<div class="modal-box">
 
-<h3>Delete Player</h3>
+<h2>Select Player</h2>
 
-<div id="deleteList"></div>
+<div id="statPlayers"></div>
 
-<button onclick="closePopup()">Cancel</button>
+<br>
 
-</div>
-</div>
-
-
-<!-- STAT POPUP -->
-
-<div class="popup" id="statPopup">
-<div class="popupContent">
-
-<h3>Select Player</h3>
-
-<div id="statPlayerList"></div>
-
-<button onclick="closePopup()">Cancel</button>
+<button onclick="closeStat()">Cancel</button>
 
 </div>
 </div>
+
 
 <script>
 
-let players=[]
-let selectedStat=""
-let selectedSide=""
+let avisponesScore=0;
+let opponentScore=0;
 
-function openAddPlayer(){
-document.getElementById("addPopup").style.display="block"
+function updateScore(team,val){
+
+if(team==="avispones"){
+avisponesScore=Math.max(0,avisponesScore+val);
+document.getElementById("avisponesScore").innerText=avisponesScore;
+}else{
+opponentScore=Math.max(0,opponentScore+val);
+document.getElementById("opponentScore").innerText=opponentScore;
+}
+
+}
+
+function resetGame(){
+
+if(confirm("Reset game?")){
+location.reload();
+}
+
+}
+
+/* PLAYER SYSTEM */
+
+let players=JSON.parse(localStorage.getItem("players"))||[];
+
+function savePlayers(){
+localStorage.setItem("players",JSON.stringify(players));
+}
+
+function openPlayerManager(){
+
+renderPlayerManager();
+document.getElementById("playerManager").style.display="flex";
+
+}
+
+function closePlayerManager(){
+document.getElementById("playerManager").style.display="none";
 }
 
 function addPlayer(){
 
-let name=document.getElementById("playerName").value
-let side=document.getElementById("playerSide").value
+let name=document.getElementById("newPlayerName").value;
+let unit=document.getElementById("newPlayerUnit").value;
 
-if(name==="") return
+if(!name)return;
 
 players.push({
-name:name,
-side:side,
-TD:0,
-CATCH:0,
-XP:0,
-INT:0,
-FLAG:0,
-SACK:0
-})
+id:Date.now(),
+name,
+unit,
+td:0,
+catch:0,
+xp:0,
+int:0,
+flag:0,
+sack:0
+});
 
-document.getElementById("playerName").value=""
+document.getElementById("newPlayerName").value="";
 
-closePopup()
-
-renderTables()
-
-}
-
-function openDeletePlayer(){
-
-let list=document.getElementById("deleteList")
-list.innerHTML=""
-
-players.forEach((p,i)=>{
-
-let btn=document.createElement("button")
-btn.innerText=p.name
-
-btn.onclick=function(){
-players.splice(i,1)
-renderTables()
-openDeletePlayer()
-}
-
-list.appendChild(btn)
-
-})
-
-document.getElementById("deletePopup").style.display="block"
+savePlayers();
+renderAll();
 
 }
 
-function openStatPopup(stat,side){
+function deletePlayer(id){
 
-selectedStat=stat
-selectedSide=side
+players=players.filter(p=>p.id!==id);
 
-let container=document.getElementById("statPlayerList")
-container.innerHTML=""
-
-players.forEach((p,i)=>{
-
-if(p.side===side){
-
-let btn=document.createElement("button")
-btn.innerText=p.name
-
-btn.onclick=function(){
-
-players[i][stat]++
-
-renderTables()
-
-closePopup()
+savePlayers();
+renderAll();
 
 }
 
-container.appendChild(btn)
+function renderPlayerManager(){
+
+let html="";
+
+players.forEach(p=>{
+html+=`<div>${p.name} (${p.unit})
+<button onclick="deletePlayer(${p.id})">Delete</button>
+</div>`;
+});
+
+document.getElementById("playerList").innerHTML=html;
 
 }
 
-})
+/* STAT SYSTEM */
 
-document.getElementById("statPopup").style.display="block"
+let currentStat="";
+let currentUnit="";
 
-}
+function openStat(stat,unit){
 
-function closePopup(){
+currentStat=stat;
+currentUnit=unit;
 
-document.querySelectorAll(".popup").forEach(p=>{
-p.style.display="none"
-})
+let list="";
 
-}
+players.filter(p=>p.unit===unit).forEach(p=>{
+list+=`<button onclick="addStat(${p.id})">${p.name}</button><br>`;
+});
 
-function renderTables(){
+document.getElementById("statPlayers").innerHTML=list;
 
-let offenseTable=document.getElementById("offenseTable")
-let defenseTable=document.getElementById("defenseTable")
-
-offenseTable.innerHTML="<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>"
-defenseTable.innerHTML="<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>"
-
-players.forEach((p)=>{
-
-if(p.side==="offense"){
-
-let row=offenseTable.insertRow()
-
-row.insertCell(0).innerText=p.name
-row.insertCell(1).innerText=p.TD
-row.insertCell(2).innerText=p.CATCH
-row.insertCell(3).innerText=p.XP
-
-addLongPress(row,p)
+document.getElementById("statModal").style.display="flex";
 
 }
 
-if(p.side==="defense"){
+function closeStat(){
+document.getElementById("statModal").style.display="none";
+}
 
-let row=defenseTable.insertRow()
+function addStat(id){
 
-row.insertCell(0).innerText=p.name
-row.insertCell(1).innerText=p.INT
-row.insertCell(2).innerText=p.FLAG
-row.insertCell(3).innerText=p.SACK
-row.insertCell(4).innerText=p.TD
+let p=players.find(x=>x.id===id);
 
-addLongPress(row,p)
+p[currentStat]++;
+
+savePlayers();
+renderAll();
+
+closeStat();
 
 }
 
-})
+/* LONG PRESS REMOVE */
 
-}
+let pressTimer;
 
-function addLongPress(row,player){
-
-for(let i=1;i<row.cells.length;i++){
-
-let cell=row.cells[i]
-
-let pressTimer
-
-cell.addEventListener("touchstart",function(){
+function startPress(id,stat){
 
 pressTimer=setTimeout(()=>{
 
-let stat=row.parentElement.rows[0].cells[i].innerText
+let p=players.find(x=>x.id===id);
 
-if(player[stat]>0){
+if(p[stat]>0)p[stat]--;
 
-player[stat]--
+savePlayers();
+renderAll();
 
-renderTables()
-
-}
-
-},600)
-
-})
-
-cell.addEventListener("touchend",function(){
-clearTimeout(pressTimer)
-})
+},700);
 
 }
 
+function cancelPress(){
+clearTimeout(pressTimer);
 }
+
+/* RENDER TABLES */
+
+function renderAll(){
+
+let offense="";
+let defense="";
+
+players.forEach(p=>{
+
+let stats=`TD:${p.td}`;
+
+if(p.unit==="offense"){
+
+stats+=` C:${p.catch} XP:${p.xp}`;
+
+offense+=`<div class="player"
+onmousedown="startPress(${p.id},'td')"
+onmouseup="cancelPress()"
+ontouchstart="startPress(${p.id},'td')"
+ontouchend="cancelPress()"
+>
+${p.name} — ${stats}
+</div>`;
+
+}
+
+if(p.unit==="defense"){
+
+stats+=` INT:${p.int} FLAG:${p.flag} SACK:${p.sack}`;
+
+defense+=`<div class="player">
+${p.name} — ${stats}
+</div>`;
+
+}
+
+});
+
+document.getElementById("offensePlayers").innerHTML=offense;
+document.getElementById("defensePlayers").innerHTML=defense;
+
+renderPlayerManager();
+
+}
+
+renderAll();
 
 </script>
 
