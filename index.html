@@ -19,11 +19,11 @@ padding:20px;
 h2{margin-top:30px;}
 
 button{
-padding:12px 18px;
-margin:5px;
-font-size:16px;
+padding:14px 20px;
+margin:6px;
+font-size:17px;
 border:none;
-border-radius:6px;
+border-radius:8px;
 cursor:pointer;
 }
 
@@ -44,7 +44,8 @@ margin-top:10px;
 
 th,td{
 border:1px solid white;
-padding:10px;
+padding:12px;
+font-size:16px;
 }
 
 th{
@@ -64,15 +65,28 @@ background:rgba(0,0,0,0.8);
 .popupContent{
 background:#222;
 padding:20px;
-margin:100px auto;
-width:300px;
+margin:80px auto;
+width:320px;
 border-radius:10px;
+}
+
+.popup input{
+width:90%;
+padding:10px;
+margin:10px 0;
+font-size:16px;
+}
+
+.popup select{
+width:95%;
+padding:10px;
+font-size:16px;
+margin-bottom:10px;
 }
 
 .popup button{
 width:100%;
-margin:8px 0;
-font-size:18px;
+margin-top:8px;
 }
 
 </style>
@@ -82,15 +96,15 @@ font-size:18px;
 
 <h1>Avispones Scoreboard</h1>
 
-<button class="addBtn" onclick="addPlayer()">Add Player</button>
-<button class="delBtn" onclick="deletePlayer()">Delete Player</button>
+<button class="addBtn" onclick="openAddPlayer()">Add Player</button>
+<button class="delBtn" onclick="openDeletePlayer()">Delete Player</button>
 
 <h2>Offense</h2>
 
 <div class="statButtons">
-<button onclick="openPopup('TD','offense')">+ TD</button>
-<button onclick="openPopup('CATCH','offense')">+ CATCH</button>
-<button onclick="openPopup('XP','offense')">+ XP</button>
+<button onclick="openStatPopup('TD','offense')">+ TD</button>
+<button onclick="openStatPopup('CATCH','offense')">+ CATCH</button>
+<button onclick="openStatPopup('XP','offense')">+ XP</button>
 </div>
 
 <table id="offenseTable">
@@ -105,10 +119,10 @@ font-size:18px;
 <h2>Defense</h2>
 
 <div class="statButtons">
-<button onclick="openPopup('INT','defense')">+ INT</button>
-<button onclick="openPopup('FLAG','defense')">+ FLAG</button>
-<button onclick="openPopup('SACK','defense')">+ SACK</button>
-<button onclick="openPopup('TD','defense')">+ TD</button>
+<button onclick="openStatPopup('INT','defense')">+ INT</button>
+<button onclick="openStatPopup('FLAG','defense')">+ FLAG</button>
+<button onclick="openStatPopup('SACK','defense')">+ SACK</button>
+<button onclick="openStatPopup('TD','defense')">+ TD</button>
 </div>
 
 <table id="defenseTable">
@@ -121,113 +135,140 @@ font-size:18px;
 </tr>
 </table>
 
-<div class="popup" id="playerPopup">
+
+<!-- ADD PLAYER POPUP -->
+
+<div class="popup" id="addPopup">
 <div class="popupContent">
-<h3>Select Player</h3>
-<div id="playerButtons"></div>
+
+<h3>Add Player</h3>
+
+<input id="playerName" placeholder="Player name">
+
+<select id="playerSide">
+<option value="offense">Offense</option>
+<option value="defense">Defense</option>
+</select>
+
+<button onclick="addPlayer()">Add Player</button>
 <button onclick="closePopup()">Cancel</button>
+
+</div>
+</div>
+
+
+<!-- DELETE PLAYER POPUP -->
+
+<div class="popup" id="deletePopup">
+<div class="popupContent">
+
+<h3>Delete Player</h3>
+
+<div id="deleteList"></div>
+
+<button onclick="closePopup()">Cancel</button>
+
+</div>
+</div>
+
+
+<!-- STAT POPUP -->
+
+<div class="popup" id="statPopup">
+<div class="popupContent">
+
+<h3>Select Player</h3>
+
+<div id="statPlayerList"></div>
+
+<button onclick="closePopup()">Cancel</button>
+
 </div>
 </div>
 
 <script>
 
-let players = []
-let selectedStat = ""
-let selectedSide = ""
+let players=[]
+let selectedStat=""
+let selectedSide=""
+
+function openAddPlayer(){
+document.getElementById("addPopup").style.display="block"
+}
 
 function addPlayer(){
 
-let name = prompt("Player name")
+let name=document.getElementById("playerName").value
+let side=document.getElementById("playerSide").value
 
-if(!name) return
+if(name==="") return
 
-let side = prompt("Type offense or defense")
+players.push({
+name:name,
+side:side,
+TD:0,
+CATCH:0,
+XP:0,
+INT:0,
+FLAG:0,
+SACK:0
+})
 
-side = side.toLowerCase()
+document.getElementById("playerName").value=""
 
-let player = {name:name,side:side,TD:0,CATCH:0,XP:0,INT:0,FLAG:0,SACK:0}
-
-players.push(player)
-
-renderTables()
-
-}
-
-function deletePlayer(){
-
-let name = prompt("Player name to delete")
-
-players = players.filter(p=>p.name!==name)
+closePopup()
 
 renderTables()
 
 }
 
-function renderTables(){
+function openDeletePlayer(){
 
-let offenseTable = document.getElementById("offenseTable")
-let defenseTable = document.getElementById("defenseTable")
-
-offenseTable.innerHTML =
-"<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>"
-
-defenseTable.innerHTML =
-"<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>"
+let list=document.getElementById("deleteList")
+list.innerHTML=""
 
 players.forEach((p,i)=>{
 
-if(p.side==="offense"){
+let btn=document.createElement("button")
+btn.innerText=p.name
 
-let row = offenseTable.insertRow()
-
-row.insertCell(0).innerText = p.name
-
-row.insertCell(1).innerText = p.TD
-row.insertCell(2).innerText = p.CATCH
-row.insertCell(3).innerText = p.XP
-
-addLongPress(row, p)
-
+btn.onclick=function(){
+players.splice(i,1)
+renderTables()
+openDeletePlayer()
 }
 
-if(p.side==="defense"){
-
-let row = defenseTable.insertRow()
-
-row.insertCell(0).innerText = p.name
-
-row.insertCell(1).innerText = p.INT
-row.insertCell(2).innerText = p.FLAG
-row.insertCell(3).innerText = p.SACK
-row.insertCell(4).innerText = p.TD
-
-addLongPress(row, p)
-
-}
+list.appendChild(btn)
 
 })
 
+document.getElementById("deletePopup").style.display="block"
+
 }
 
-function openPopup(stat,side){
+function openStatPopup(stat,side){
 
-selectedStat = stat
-selectedSide = side
+selectedStat=stat
+selectedSide=side
 
-let container = document.getElementById("playerButtons")
-container.innerHTML = ""
+let container=document.getElementById("statPlayerList")
+container.innerHTML=""
 
 players.forEach((p,i)=>{
 
 if(p.side===side){
 
-let btn = document.createElement("button")
-btn.innerText = p.name
+let btn=document.createElement("button")
+btn.innerText=p.name
 
-btn.onclick = function(){
+btn.onclick=function(){
+
 players[i][stat]++
+
 renderTables()
+
 closePopup()
+
 }
 
 container.appendChild(btn)
@@ -236,33 +277,77 @@ container.appendChild(btn)
 
 })
 
-document.getElementById("playerPopup").style.display="block"
+document.getElementById("statPopup").style.display="block"
 
 }
 
 function closePopup(){
-document.getElementById("playerPopup").style.display="none"
+
+document.querySelectorAll(".popup").forEach(p=>{
+p.style.display="none"
+})
+
 }
 
-function addLongPress(row, player){
+function renderTables(){
 
-let cells = row.querySelectorAll("td")
+let offenseTable=document.getElementById("offenseTable")
+let defenseTable=document.getElementById("defenseTable")
 
-cells.forEach((cell,index)=>{
+offenseTable.innerHTML="<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>"
+defenseTable.innerHTML="<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>"
 
-if(index===0) return
+players.forEach((p)=>{
 
-let timer
+if(p.side==="offense"){
+
+let row=offenseTable.insertRow()
+
+row.insertCell(0).innerText=p.name
+row.insertCell(1).innerText=p.TD
+row.insertCell(2).innerText=p.CATCH
+row.insertCell(3).innerText=p.XP
+
+addLongPress(row,p)
+
+}
+
+if(p.side==="defense"){
+
+let row=defenseTable.insertRow()
+
+row.insertCell(0).innerText=p.name
+row.insertCell(1).innerText=p.INT
+row.insertCell(2).innerText=p.FLAG
+row.insertCell(3).innerText=p.SACK
+row.insertCell(4).innerText=p.TD
+
+addLongPress(row,p)
+
+}
+
+})
+
+}
+
+function addLongPress(row,player){
+
+for(let i=1;i<row.cells.length;i++){
+
+let cell=row.cells[i]
+
+let pressTimer
 
 cell.addEventListener("touchstart",function(){
 
-timer = setTimeout(()=>{
+pressTimer=setTimeout(()=>{
 
-let stat = row.parentElement.rows[0].cells[index].innerText
+let stat=row.parentElement.rows[0].cells[i].innerText
 
-if(player[stat] > 0){
+if(player[stat]>0){
 
 player[stat]--
+
 renderTables()
 
 }
@@ -272,10 +357,10 @@ renderTables()
 })
 
 cell.addEventListener("touchend",function(){
-clearTimeout(timer)
+clearTimeout(pressTimer)
 })
 
-})
+}
 
 }
 
