@@ -6,96 +6,114 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <style>
-body {
-font-family: Arial, sans-serif;
-text-align: center;
-background: #0b6b3a;
-color: white;
-margin: 0;
-padding: 20px;
+
+body{
+font-family:Arial,sans-serif;
+text-align:center;
+background:#0b6b3a;
+color:white;
+margin:0;
+padding:20px;
 }
 
-h1 { margin-bottom: 10px; }
-
-input, select {
-padding: 8px;
-font-size: 16px;
-border-radius: 8px;
-border: none;
-text-align: center;
-margin: 5px;
+input,select{
+padding:8px;
+font-size:16px;
+border-radius:8px;
+border:none;
+margin:5px;
+text-align:center;
 }
 
-.score-container {
-display: flex;
-justify-content: space-around;
-margin: 30px 0;
-flex-wrap: wrap;
+button{
+padding:8px 12px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+margin:4px;
 }
 
-.team {
-background: white;
-color: #0b6b3a;
-padding: 20px;
-border-radius: 15px;
-width: 300px;
-margin: 10px;
+.score-container{
+display:flex;
+justify-content:center;
+gap:40px;
+flex-wrap:wrap;
+margin:30px 0;
 }
 
-.score {
-font-size: 70px;
-margin: 20px 0;
+.team{
+background:white;
+color:#0b6b3a;
+padding:20px;
+border-radius:15px;
+width:260px;
 }
 
-button {
-padding: 10px 14px;
-font-size: 16px;
-margin: 4px;
-border-radius: 8px;
-border: none;
-cursor: pointer;
+.score{
+font-size:70px;
+margin:20px 0;
 }
 
-.add1 { background: #28a745; color: white; }
-.add6 { background: #14532d; color: white; }
-.sub { background: #dc3545; color: white; }
+.add1{background:#28a745;color:white;}
+.add6{background:#14532d;color:white;}
+.sub{background:#dc3545;color:white;}
 
-.export-btn { background: #ffc107; color: black; margin-top: 20px; }
-
-.reset-btn { background: black; color: white; margin-top: 10px; }
-
-/* PLAYER TABLES */
-
-table {
-margin: auto;
-border-collapse: collapse;
-background: white;
-color: black;
-border-radius: 10px;
-overflow: hidden;
+.export-btn{
+background:#ffc107;
+color:black;
 }
 
-th, td {
-padding: 10px 14px;
-border: 1px solid #ddd;
+.reset-btn{
+background:black;
+color:white;
+}
+
+/* TABLE */
+
+table{
+margin:auto;
+border-collapse:collapse;
+background:white;
+color:black;
+}
+
+th,td{
+padding:10px 12px;
+border:1px solid #ddd;
 }
 
 /* MODAL */
 
-#playerModal {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.8);
-justify-content: center;
-align-items: center;
+#playerModal{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.8);
+justify-content:center;
+align-items:center;
 }
 
-.modal-content {
-background: white;
-color: black;
-padding: 30px;
-border-radius: 12px;
+.modal-box{
+background:white;
+color:black;
+padding:30px;
+border-radius:12px;
+width:320px;
+max-height:80vh;
+overflow:auto;
+}
+
+.playerRow{
+display:flex;
+justify-content:space-between;
+margin:6px 0;
+}
+
+.deleteBtn{
+background:#dc3545;
+color:white;
+font-size:12px;
+padding:4px 8px;
 }
 
 </style>
@@ -105,11 +123,10 @@ border-radius: 12px;
 
 <h1>Avispones Scoreboard</h1>
 
-<div>
-<input type="text" id="categoryName" placeholder="Category" oninput="saveState()">
-</div>
+<input id="categoryName" placeholder="Category" oninput="saveState()">
 
-<div style="margin-bottom:20px;">
+<br>
+
 <select id="jornadaSelect" onchange="handleJornadaChange()">
 <option value="">Select Match</option>
 <option>Jornada 1</option>
@@ -123,25 +140,31 @@ border-radius: 12px;
 <option value="custom">Custom...</option>
 </select>
 
-<input type="text" id="customJornada" placeholder="Custom match" style="display:none;" oninput="saveState()">
-</div>
+<input id="customJornada" placeholder="Custom match" style="display:none" oninput="saveState()">
 
 <div class="score-container">
 
 <div class="team">
 <h2>Avispones</h2>
-<div class="score" id="avisponesScore">0</div>
+
+<div id="avisponesScore" class="score">0</div>
+
 <button class="add1" onclick="updateScore('avispones',1)">+1</button>
 <button class="add6" onclick="updateScore('avispones',6)">+6</button>
 <button class="sub" onclick="updateScore('avispones',-1)">-1</button>
+
 </div>
 
 <div class="team">
-<input type="text" id="opponentName" placeholder="Opponent Name" oninput="saveState()">
-<div class="score" id="opponentScore">0</div>
+
+<input id="opponentName" placeholder="Opponent" oninput="saveState()">
+
+<div id="opponentScore" class="score">0</div>
+
 <button class="add1" onclick="updateScore('opponent',1)">+1</button>
 <button class="add6" onclick="updateScore('opponent',6)">+6</button>
 <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+
 </div>
 
 </div>
@@ -154,7 +177,7 @@ border-radius: 12px;
 
 <h2>Avispones Player Stats</h2>
 
-<button onclick="openPlayerModal()">Add Player</button>
+<button onclick="openPlayerModal()">Manage Players</button>
 
 <h3>Offense</h3>
 
@@ -165,9 +188,9 @@ border-radius: 12px;
 <th>TD</th>
 <th>Catch</th>
 <th>XP</th>
-<th>Delete</th>
 </tr>
 </thead>
+
 <tbody id="offenseTable"></tbody>
 </table>
 
@@ -180,42 +203,69 @@ border-radius: 12px;
 <th>INT</th>
 <th>Flag</th>
 <th>TD</th>
-<th>Delete</th>
 </tr>
 </thead>
+
 <tbody id="defenseTable"></tbody>
 </table>
 
 <!-- PLAYER MODAL -->
 
 <div id="playerModal">
-<div class="modal-content">
 
-<h2>Add Player</h2>
+<div class="modal-box">
 
-<input id="playerName" placeholder="Player Name">
+<h3>Add Player</h3>
 
-<br><br>
+<input id="playerName" placeholder="Player name">
+
+<br>
 
 <select id="playerUnit">
 <option value="offense">Offense</option>
 <option value="defense">Defense</option>
 </select>
 
-<br><br>
+<br>
 
 <button onclick="addPlayer()">Add Player</button>
-<button onclick="closePlayerModal()">Cancel</button>
+
+<hr>
+
+<h3>Current Players</h3>
+
+<div id="playerList"></div>
+
+<br>
+
+<button onclick="closePlayerModal()">Close</button>
 
 </div>
+
 </div>
 
 <script>
 
-let avisponesScore=0;
-let opponentScore=0;
+/* SCORE SYSTEM */
 
-/* GAME SAVE */
+let avisponesScore=0
+let opponentScore=0
+
+function updateScore(team,val){
+
+if(team==="avispones"){
+avisponesScore=Math.max(0,avisponesScore+val)
+document.getElementById("avisponesScore").textContent=avisponesScore
+}else{
+opponentScore=Math.max(0,opponentScore+val)
+document.getElementById("opponentScore").textContent=opponentScore
+}
+
+saveState()
+
+}
+
+/* SAVE GAME */
 
 function saveState(){
 
@@ -223,98 +273,54 @@ const data={
 avispones:avisponesScore,
 opponent:opponentScore,
 opponentName:document.getElementById("opponentName").value,
-categoryName:document.getElementById("categoryName").value,
-jornadaSelect:document.getElementById("jornadaSelect").value,
-customJornada:document.getElementById("customJornada").value
-};
-
-localStorage.setItem("avisponesGame",JSON.stringify(data));
+categoryName:document.getElementById("categoryName").value
 }
 
-window.onload=function(){
-
-const saved=JSON.parse(localStorage.getItem("avisponesGame"));
-
-if(saved){
-
-avisponesScore=saved.avispones||0;
-opponentScore=saved.opponent||0;
-
-document.getElementById("avisponesScore").textContent=avisponesScore;
-document.getElementById("opponentScore").textContent=opponentScore;
-
-document.getElementById("opponentName").value=saved.opponentName||"";
-document.getElementById("categoryName").value=saved.categoryName||"";
-document.getElementById("jornadaSelect").value=saved.jornadaSelect||"";
-document.getElementById("customJornada").value=saved.customJornada||"";
+localStorage.setItem("avisponesGame",JSON.stringify(data))
 
 }
 
-renderPlayers();
-};
-
-function handleJornadaChange(){
-
-const select=document.getElementById("jornadaSelect");
-const custom=document.getElementById("customJornada");
-
-if(select.value==="custom"){
-custom.style.display="inline-block";
-}else{
-custom.style.display="none";
-custom.value="";
-}
-
-saveState();
-}
-
-function updateScore(team,val){
-
-if(team==="avispones"){
-avisponesScore=Math.max(0,avisponesScore+val);
-document.getElementById("avisponesScore").textContent=avisponesScore;
-}else{
-opponentScore=Math.max(0,opponentScore+val);
-document.getElementById("opponentScore").textContent=opponentScore;
-}
-
-saveState();
-}
+/* RESET */
 
 function resetGame(){
 
-if(confirm("Reset the game?")){
+if(confirm("Reset game?")){
 
-avisponesScore=0;
-opponentScore=0;
+localStorage.removeItem("avisponesGame")
+localStorage.removeItem("avisponesPlayers")
 
-localStorage.removeItem("avisponesGame");
-localStorage.removeItem("avisponesPlayers");
+location.reload()
 
-location.reload();
 }
+
 }
 
 /* PLAYER SYSTEM */
 
-let players=JSON.parse(localStorage.getItem("avisponesPlayers"))||[];
+let players=JSON.parse(localStorage.getItem("avisponesPlayers"))||[]
 
 function openPlayerModal(){
-document.getElementById("playerModal").style.display="flex";
+
+document.getElementById("playerModal").style.display="flex"
+
+renderPlayerList()
+
 }
 
 function closePlayerModal(){
-document.getElementById("playerModal").style.display="none";
+
+document.getElementById("playerModal").style.display="none"
+
 }
 
 function addPlayer(){
 
-const name=document.getElementById("playerName").value.trim();
-const unit=document.getElementById("playerUnit").value;
+const name=document.getElementById("playerName").value.trim()
+const unit=document.getElementById("playerUnit").value
 
-if(!name)return;
+if(!name)return
 
-const player={
+players.push({
 id:Date.now(),
 name:name,
 unit:unit,
@@ -323,53 +329,90 @@ catch:0,
 xp:0,
 int:0,
 flag:0
-};
+})
 
-players.push(player);
+document.getElementById("playerName").value=""
 
-savePlayers();
-renderPlayers();
+savePlayers()
 
-document.getElementById("playerName").value="";
-closePlayerModal();
-}
+renderPlayers()
 
-function savePlayers(){
-localStorage.setItem("avisponesPlayers",JSON.stringify(players));
-}
+renderPlayerList()
 
-function updateStat(id,stat,val){
-
-const player=players.find(p=>p.id===id);
-
-player[stat]=Math.max(0,(player[stat]||0)+val);
-
-savePlayers();
-renderPlayers();
 }
 
 function deletePlayer(id){
 
-players=players.filter(p=>p.id!==id);
+players=players.filter(p=>p.id!==id)
 
-savePlayers();
-renderPlayers();
+savePlayers()
+
+renderPlayers()
+
+renderPlayerList()
+
+}
+
+function savePlayers(){
+
+localStorage.setItem("avisponesPlayers",JSON.stringify(players))
+
+}
+
+function renderPlayerList(){
+
+const list=document.getElementById("playerList")
+
+list.innerHTML=""
+
+players.forEach(p=>{
+
+list.innerHTML+=`
+
+<div class="playerRow">
+
+<span>${p.name} (${p.unit})</span>
+
+<button class="deleteBtn" onclick="deletePlayer(${p.id})">Delete</button>
+
+</div>
+
+`
+
+})
+
+}
+
+/* STATS */
+
+function updateStat(id,stat,val){
+
+const player=players.find(p=>p.id===id)
+
+player[stat]=Math.max(0,(player[stat]||0)+val)
+
+savePlayers()
+
+renderPlayers()
+
 }
 
 function renderPlayers(){
 
-const offense=document.getElementById("offenseTable");
-const defense=document.getElementById("defenseTable");
+const offense=document.getElementById("offenseTable")
+const defense=document.getElementById("defenseTable")
 
-offense.innerHTML="";
-defense.innerHTML="";
+offense.innerHTML=""
+defense.innerHTML=""
 
 players.forEach(p=>{
 
 if(p.unit==="offense"){
 
 offense.innerHTML+=`
+
 <tr>
+
 <td>${p.name}</td>
 
 <td>
@@ -390,19 +433,18 @@ ${p.xp}
 <button onclick="updateStat(${p.id},'xp',-1)">-</button>
 </td>
 
-<td>
-<button onclick="deletePlayer(${p.id})">Delete</button>
-</td>
-
 </tr>
-`;
+
+`
 
 }
 
 if(p.unit==="defense"){
 
 defense.innerHTML+=`
+
 <tr>
+
 <td>${p.name}</td>
 
 <td>
@@ -423,59 +465,53 @@ ${p.td}
 <button onclick="updateStat(${p.id},'td',-1)">-</button>
 </td>
 
-<td>
-<button onclick="deletePlayer(${p.id})">Delete</button>
-</td>
-
 </tr>
-`;
+
+`
 
 }
 
-});
+})
 
 }
 
-/* EXPORT IMAGE */
+/* EXPORT */
 
 function exportScore(){
 
-const canvas=document.createElement("canvas");
-canvas.width=1080;
-canvas.height=1080;
+const canvas=document.createElement("canvas")
+canvas.width=1080
+canvas.height=1080
 
-const ctx=canvas.getContext("2d");
+const ctx=canvas.getContext("2d")
 
-const gradient=ctx.createLinearGradient(0,0,0,1080);
-gradient.addColorStop(0,"#F6D365");
-gradient.addColorStop(0.5,"#D4AF37");
-gradient.addColorStop(1,"#A67C00");
+ctx.fillStyle="#D4AF37"
+ctx.fillRect(0,0,1080,1080)
 
-ctx.fillStyle=gradient;
-ctx.fillRect(0,0,1080,1080);
+ctx.fillStyle="white"
+ctx.textAlign="center"
 
-ctx.fillStyle="white";
-ctx.textAlign="center";
+ctx.font="bold 80px Arial"
+ctx.fillText("AVISPONES "+avisponesScore,540,500)
 
-ctx.font="bold 80px Arial";
-ctx.fillText("AVISPONES "+avisponesScore,540,500);
+const opponent=document.getElementById("opponentName").value||"RIVAL"
 
-const opponent=document.getElementById("opponentName").value||"RIVAL";
-
-ctx.fillText(opponent.toUpperCase()+" "+opponentScore,540,620);
+ctx.fillText(opponent+" "+opponentScore,540,620)
 
 canvas.toBlob(function(blob){
 
-const url=URL.createObjectURL(blob);
+const url=URL.createObjectURL(blob)
 
-const link=document.createElement("a");
-link.href=url;
-link.download="avispones-score.png";
-link.click();
+const link=document.createElement("a")
+link.href=url
+link.download="avispones-score.png"
+link.click()
 
-});
+})
 
 }
+
+renderPlayers()
 
 </script>
 
