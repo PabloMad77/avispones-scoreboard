@@ -5,6 +5,8 @@
 <title>Avispones Scoreboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 
 body{
@@ -114,6 +116,8 @@ border-radius:14px;
 
 <body>
 
+<div id="scoreExportArea">
+
 <h1>Avispones Scoreboard</h1>
 
 <input id="categoryName" placeholder="Category">
@@ -162,11 +166,15 @@ border-radius:14px;
 
 </div>
 
-<button class="export-btn">Export Score Image</button>
+</div>
+
+<button class="export-btn" onclick="exportScore()">Export Score Image</button>
 <br>
 <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 
 <hr style="margin:40px 0">
+
+<div id="statsExportArea">
 
 <h2>Avispones Player Stats</h2>
 
@@ -208,46 +216,9 @@ border-radius:14px;
 </tr>
 </table>
 
-<div class="modal" id="playerManager">
-<div class="modal-box">
-
-<h2>Players</h2>
-
-<input id="newPlayerName" placeholder="Player Name">
-
-<select id="newPlayerUnit">
-<option value="offense">Offense</option>
-<option value="defense">Defense</option>
-</select>
-
-<br><br>
-
-<button onclick="addPlayer()">Add Player</button>
-
-<hr>
-
-<div id="playerList"></div>
-
-<br>
-
-<button onclick="closePlayerManager()">Close</button>
-
-</div>
 </div>
 
-<div class="modal" id="statModal">
-<div class="modal-box">
-
-<h2>Select Player</h2>
-
-<div id="statPlayers"></div>
-
-<br>
-
-<button onclick="closeStat()">Cancel</button>
-
-</div>
-</div>
+<button class="export-btn" onclick="exportStats()">Export Stats Image</button>
 
 <script>
 
@@ -255,7 +226,6 @@ let avisponesScore=0
 let opponentScore=0
 
 function updateScore(team,val){
-
 if(team==="avispones"){
 avisponesScore=Math.max(0,avisponesScore+val)
 document.getElementById("avisponesScore").innerText=avisponesScore
@@ -263,7 +233,6 @@ document.getElementById("avisponesScore").innerText=avisponesScore
 opponentScore=Math.max(0,opponentScore+val)
 document.getElementById("opponentScore").innerText=opponentScore
 }
-
 }
 
 function resetGame(){
@@ -273,7 +242,6 @@ location.reload()
 }
 
 function handleJornadaChange(){
-
 const select=document.getElementById("jornadaSelect")
 const custom=document.getElementById("customJornada")
 
@@ -282,7 +250,6 @@ custom.style.display="inline-block"
 }else{
 custom.style.display="none"
 }
-
 }
 
 let players=JSON.parse(localStorage.getItem("players"))||[]
@@ -291,20 +258,9 @@ function savePlayers(){
 localStorage.setItem("players",JSON.stringify(players))
 }
 
-function openPlayerManager(){
-renderPlayerManager()
-document.getElementById("playerManager").style.display="flex"
-}
-
-function closePlayerManager(){
-document.getElementById("playerManager").style.display="none"
-}
-
 function addPlayer(){
-
 let name=document.getElementById("newPlayerName").value
 let unit=document.getElementById("newPlayerUnit").value
-
 if(!name)return
 
 players.push({
@@ -320,38 +276,14 @@ sack:0
 })
 
 document.getElementById("newPlayerName").value=""
-
 savePlayers()
 renderAll()
-
-}
-
-function deletePlayer(id){
-
-players=players.filter(p=>p.id!==id)
-
-savePlayers()
-renderAll()
-
-}
-
-function renderPlayerManager(){
-
-let html=""
-
-players.forEach(p=>{
-html+=`${p.name} (${p.unit}) <button onclick="deletePlayer(${p.id})">Delete</button><br>`
-})
-
-document.getElementById("playerList").innerHTML=html
-
 }
 
 let currentStat=""
 let currentUnit=""
 
 function openStat(stat,unit){
-
 currentStat=stat
 currentUnit=unit
 
@@ -362,26 +294,14 @@ list+=`<button onclick="addStat(${p.id})">${p.name}</button><br>`
 })
 
 document.getElementById("statPlayers").innerHTML=list
-
 document.getElementById("statModal").style.display="flex"
-
-}
-
-function closeStat(){
-document.getElementById("statModal").style.display="none"
 }
 
 function addStat(id){
-
 let p=players.find(x=>x.id===id)
-
 p[currentStat]++
-
 savePlayers()
 renderAll()
-
-closeStat()
-
 }
 
 function renderAll(){
@@ -392,7 +312,6 @@ let defenseRows=""
 players.forEach(p=>{
 
 if(p.unit==="offense"){
-
 offenseRows+=`
 <tr>
 <td>${p.name}</td>
@@ -400,11 +319,9 @@ offenseRows+=`
 <td>${p.catch}</td>
 <td>${p.xp}</td>
 </tr>`
-
 }
 
 if(p.unit==="defense"){
-
 defenseRows+=`
 <tr>
 <td>${p.name}</td>
@@ -413,7 +330,6 @@ defenseRows+=`
 <td>${p.sack}</td>
 <td>${p.td}</td>
 </tr>`
-
 }
 
 })
@@ -423,12 +339,27 @@ document.getElementById("offenseTable").innerHTML=
 
 document.getElementById("defenseTable").innerHTML=
 `<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>`+defenseRows
-
-renderPlayerManager()
-
 }
 
 renderAll()
+
+function exportScore(){
+html2canvas(document.querySelector("#scoreExportArea")).then(canvas=>{
+let link=document.createElement("a")
+link.download="avispones_score.png"
+link.href=canvas.toDataURL()
+link.click()
+})
+}
+
+function exportStats(){
+html2canvas(document.querySelector("#statsExportArea")).then(canvas=>{
+let link=document.createElement("a")
+link.download="avispones_stats.png"
+link.href=canvas.toDataURL()
+link.click()
+})
+}
 
 </script>
 
