@@ -343,48 +343,22 @@ document.getElementById("defenseTable").innerHTML=
 
 renderAll()
 
-/* IMPROVED EXPORT FUNCTIONS */
-
-function downloadCanvas(canvas,filename){
-
-canvas.toBlob(function(blob){
-
-const file=new File([blob],filename,{type:"image/png"})
-
-if(navigator.share && navigator.canShare && navigator.canShare({files:[file]})){
-navigator.share({
-files:[file],
-title:"Avispones"
-})
-}else{
-const link=document.createElement("a")
-link.download=filename
-link.href=URL.createObjectURL(blob)
-link.click()
-}
-
-})
-
-}
-
 function exportScore(){
-
-html2canvas(document.querySelector("#scoreExportArea"),{
-scale:3
-}).then(canvas=>{
-downloadCanvas(canvas,"avispones_score.png")
+html2canvas(document.querySelector("#scoreExportArea")).then(canvas=>{
+let link=document.createElement("a")
+link.download="avispones_score.png"
+link.href=canvas.toDataURL()
+link.click()
 })
-
 }
 
 function exportStats(){
-
-html2canvas(document.querySelector("#statsExportArea"),{
-scale:3
-}).then(canvas=>{
-downloadCanvas(canvas,"avispones_stats.png")
+html2canvas(document.querySelector("#statsExportArea")).then(canvas=>{
+let link=document.createElement("a")
+link.download="avispones_stats.png"
+link.href=canvas.toDataURL()
+link.click()
 })
-
 }
 
 </script>
