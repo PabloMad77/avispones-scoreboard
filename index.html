@@ -9,20 +9,22 @@
 
 body{
 font-family:Arial;
+text-align:center;
 background:#0b6b3a;
 color:white;
-text-align:center;
 margin:0;
 padding:20px;
 }
 
+h1{margin-bottom:10px;}
+
 input,select{
-padding:8px;
+padding:10px;
 font-size:16px;
 border-radius:8px;
 border:none;
-margin:5px;
 text-align:center;
+margin:5px;
 }
 
 .score-container{
@@ -67,18 +69,27 @@ background:#ffd000;
 color:black;
 font-weight:bold;
 font-size:22px;
-padding:16px 20px;
+padding:16px 22px;
 margin:8px;
 }
 
-.player{
+table{
+width:100%;
+max-width:600px;
+margin:auto;
+border-collapse:collapse;
 background:white;
 color:black;
-padding:12px;
-margin:6px auto;
-width:260px;
-border-radius:10px;
-font-size:20px;
+margin-top:10px;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+}
+
+th{
+background:#eee;
 }
 
 .modal{
@@ -107,22 +118,46 @@ border-radius:14px;
 
 <input id="categoryName" placeholder="Category">
 
+<br>
+
+<select id="jornadaSelect" onchange="handleJornadaChange()">
+<option value="">Select Match</option>
+<option>Jornada 1</option>
+<option>Jornada 2</option>
+<option>Jornada 3</option>
+<option>Jornada 4</option>
+<option>Jornada 5</option>
+<option>Quarterfinal</option>
+<option>Semifinal</option>
+<option>Final</option>
+<option value="custom">Custom...</option>
+</select>
+
+<input id="customJornada" placeholder="Custom match" style="display:none;">
+
 <div class="score-container">
 
 <div class="team">
 <h2>Avispones</h2>
+
 <div class="score" id="avisponesScore">0</div>
+
 <button class="add1" onclick="updateScore('avispones',1)">+1</button>
 <button class="add6" onclick="updateScore('avispones',6)">+6</button>
 <button class="sub" onclick="updateScore('avispones',-1)">-1</button>
+
 </div>
 
 <div class="team">
-<input id="opponentName" placeholder="Opponent">
+
+<input id="opponentName" placeholder="Opponent Name">
+
 <div class="score" id="opponentScore">0</div>
+
 <button class="add1" onclick="updateScore('opponent',1)">+1</button>
 <button class="add6" onclick="updateScore('opponent',6)">+6</button>
 <button class="sub" onclick="updateScore('opponent',-1)">-1</button>
+
 </div>
 
 </div>
@@ -145,7 +180,14 @@ border-radius:14px;
 <button class="stat-btn" onclick="openStat('xp','offense')">XP</button>
 </div>
 
-<div id="offensePlayers"></div>
+<table id="offenseTable">
+<tr>
+<th>Player</th>
+<th>TD</th>
+<th>CATCH</th>
+<th>XP</th>
+</tr>
+</table>
 
 <h3>Defense</h3>
 
@@ -156,10 +198,15 @@ border-radius:14px;
 <button class="stat-btn" onclick="openStat('td','defense')">TD</button>
 </div>
 
-<div id="defensePlayers"></div>
-
-
-<!-- PLAYER MANAGER -->
+<table id="defenseTable">
+<tr>
+<th>Player</th>
+<th>INT</th>
+<th>FLAG</th>
+<th>SACK</th>
+<th>TD</th>
+</tr>
+</table>
 
 <div class="modal" id="playerManager">
 <div class="modal-box">
@@ -188,9 +235,6 @@ border-radius:14px;
 </div>
 </div>
 
-
-<!-- STAT SELECT -->
-
 <div class="modal" id="statModal">
 <div class="modal-box">
 
@@ -205,57 +249,63 @@ border-radius:14px;
 </div>
 </div>
 
-
 <script>
 
-let avisponesScore=0;
-let opponentScore=0;
+let avisponesScore=0
+let opponentScore=0
 
 function updateScore(team,val){
 
 if(team==="avispones"){
-avisponesScore=Math.max(0,avisponesScore+val);
-document.getElementById("avisponesScore").innerText=avisponesScore;
+avisponesScore=Math.max(0,avisponesScore+val)
+document.getElementById("avisponesScore").innerText=avisponesScore
 }else{
-opponentScore=Math.max(0,opponentScore+val);
-document.getElementById("opponentScore").innerText=opponentScore;
+opponentScore=Math.max(0,opponentScore+val)
+document.getElementById("opponentScore").innerText=opponentScore
 }
 
 }
 
 function resetGame(){
-
 if(confirm("Reset game?")){
-location.reload();
+location.reload()
+}
+}
+
+function handleJornadaChange(){
+
+const select=document.getElementById("jornadaSelect")
+const custom=document.getElementById("customJornada")
+
+if(select.value==="custom"){
+custom.style.display="inline-block"
+}else{
+custom.style.display="none"
 }
 
 }
 
-/* PLAYER SYSTEM */
-
-let players=JSON.parse(localStorage.getItem("players"))||[];
+let players=JSON.parse(localStorage.getItem("players"))||[]
 
 function savePlayers(){
-localStorage.setItem("players",JSON.stringify(players));
+localStorage.setItem("players",JSON.stringify(players))
 }
 
 function openPlayerManager(){
-
-renderPlayerManager();
-document.getElementById("playerManager").style.display="flex";
-
+renderPlayerManager()
+document.getElementById("playerManager").style.display="flex"
 }
 
 function closePlayerManager(){
-document.getElementById("playerManager").style.display="none";
+document.getElementById("playerManager").style.display="none"
 }
 
 function addPlayer(){
 
-let name=document.getElementById("newPlayerName").value;
-let unit=document.getElementById("newPlayerUnit").value;
+let name=document.getElementById("newPlayerName").value
+let unit=document.getElementById("newPlayerUnit").value
 
-if(!name)return;
+if(!name)return
 
 players.push({
 id:Date.now(),
@@ -267,146 +317,118 @@ xp:0,
 int:0,
 flag:0,
 sack:0
-});
+})
 
-document.getElementById("newPlayerName").value="";
+document.getElementById("newPlayerName").value=""
 
-savePlayers();
-renderAll();
+savePlayers()
+renderAll()
 
 }
 
 function deletePlayer(id){
 
-players=players.filter(p=>p.id!==id);
+players=players.filter(p=>p.id!==id)
 
-savePlayers();
-renderAll();
+savePlayers()
+renderAll()
 
 }
 
 function renderPlayerManager(){
 
-let html="";
+let html=""
 
 players.forEach(p=>{
-html+=`<div>${p.name} (${p.unit})
-<button onclick="deletePlayer(${p.id})">Delete</button>
-</div>`;
-});
+html+=`${p.name} (${p.unit}) <button onclick="deletePlayer(${p.id})">Delete</button><br>`
+})
 
-document.getElementById("playerList").innerHTML=html;
+document.getElementById("playerList").innerHTML=html
 
 }
 
-/* STAT SYSTEM */
-
-let currentStat="";
-let currentUnit="";
+let currentStat=""
+let currentUnit=""
 
 function openStat(stat,unit){
 
-currentStat=stat;
-currentUnit=unit;
+currentStat=stat
+currentUnit=unit
 
-let list="";
+let list=""
 
 players.filter(p=>p.unit===unit).forEach(p=>{
-list+=`<button onclick="addStat(${p.id})">${p.name}</button><br>`;
-});
+list+=`<button onclick="addStat(${p.id})">${p.name}</button><br>`
+})
 
-document.getElementById("statPlayers").innerHTML=list;
+document.getElementById("statPlayers").innerHTML=list
 
-document.getElementById("statModal").style.display="flex";
+document.getElementById("statModal").style.display="flex"
 
 }
 
 function closeStat(){
-document.getElementById("statModal").style.display="none";
+document.getElementById("statModal").style.display="none"
 }
 
 function addStat(id){
 
-let p=players.find(x=>x.id===id);
+let p=players.find(x=>x.id===id)
 
-p[currentStat]++;
+p[currentStat]++
 
-savePlayers();
-renderAll();
+savePlayers()
+renderAll()
 
-closeStat();
-
-}
-
-/* LONG PRESS REMOVE */
-
-let pressTimer;
-
-function startPress(id,stat){
-
-pressTimer=setTimeout(()=>{
-
-let p=players.find(x=>x.id===id);
-
-if(p[stat]>0)p[stat]--;
-
-savePlayers();
-renderAll();
-
-},700);
+closeStat()
 
 }
-
-function cancelPress(){
-clearTimeout(pressTimer);
-}
-
-/* RENDER TABLES */
 
 function renderAll(){
 
-let offense="";
-let defense="";
+let offenseRows=""
+let defenseRows=""
 
 players.forEach(p=>{
 
-let stats=`TD:${p.td}`;
-
 if(p.unit==="offense"){
 
-stats+=` C:${p.catch} XP:${p.xp}`;
-
-offense+=`<div class="player"
-onmousedown="startPress(${p.id},'td')"
-onmouseup="cancelPress()"
-ontouchstart="startPress(${p.id},'td')"
-ontouchend="cancelPress()"
->
-${p.name} — ${stats}
-</div>`;
+offenseRows+=`
+<tr>
+<td>${p.name}</td>
+<td>${p.td}</td>
+<td>${p.catch}</td>
+<td>${p.xp}</td>
+</tr>`
 
 }
 
 if(p.unit==="defense"){
 
-stats+=` INT:${p.int} FLAG:${p.flag} SACK:${p.sack}`;
-
-defense+=`<div class="player">
-${p.name} — ${stats}
-</div>`;
-
-}
-
-});
-
-document.getElementById("offensePlayers").innerHTML=offense;
-document.getElementById("defensePlayers").innerHTML=defense;
-
-renderPlayerManager();
+defenseRows+=`
+<tr>
+<td>${p.name}</td>
+<td>${p.int}</td>
+<td>${p.flag}</td>
+<td>${p.sack}</td>
+<td>${p.td}</td>
+</tr>`
 
 }
 
-renderAll();
+})
+
+document.getElementById("offenseTable").innerHTML=
+`<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>`+offenseRows
+
+document.getElementById("defenseTable").innerHTML=
+`<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>`+defenseRows
+
+renderPlayerManager()
+
+}
+
+renderAll()
 
 </script>
 
