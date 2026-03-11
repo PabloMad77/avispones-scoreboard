@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Avispones Scoreboard</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
 
 <style>
@@ -256,7 +255,7 @@ tr:hover td { background: #f5fdf7; }
 
 <div id="scoreExportArea">
 
-  <h1>🏈 Avispones</h1>
+  <h1>Avispones</h1>
 
   <div>
     <input id="categoryName" placeholder="Category / League">
@@ -313,7 +312,7 @@ tr:hover td { background: #f5fdf7; }
 
 <div id="statsExportArea">
 
-  <h2>📊 Player Stats</h2>
+  <h2>Player Stats</h2>
 
   <button onclick="openPlayerManager()" style="background:#e8f5e9; color:#14532d; font-weight:600; margin-bottom:16px;">
     👤 Manage Players
@@ -571,16 +570,301 @@ window.addEventListener('click', e => {
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 
+// Instagram 4:5 = 1080 x 1350 px
+const IG_W = 1080;
+const IG_H = 1350;
+
+const C = {
+  green:     '#0b6b3a',
+  greenDark: '#07472a',
+  greenMid:  '#0d8048',
+  gold:      '#ffd000',
+  white:     '#ffffff',
+  offwhite:  '#f0f0f0',
+  black:     '#0a0a0a',
+};
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function drawScoreCard() {
+  const canvas = document.createElement('canvas');
+  canvas.width  = IG_W;
+  canvas.height = IG_H;
+  const ctx = canvas.getContext('2d');
+
+  // ── Background ──────────────────────────────────────────────────────
+  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
+  bg.addColorStop(0,   '#04200f');
+  bg.addColorStop(0.5, C.greenDark);
+  bg.addColorStop(1,   '#0d5c30');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, IG_W, IG_H);
+
+  // diagonal accent stripe
+  ctx.save();
+  ctx.globalAlpha = 0.06;
+  ctx.fillStyle = C.white;
+  ctx.beginPath();
+  ctx.moveTo(0, IG_H * 0.55);
+  ctx.lineTo(IG_W, IG_H * 0.3);
+  ctx.lineTo(IG_W, IG_H * 0.6);
+  ctx.lineTo(0, IG_H * 0.85);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // ── Gold top bar ────────────────────────────────────────────────────
+  ctx.fillStyle = C.gold;
+  ctx.fillRect(0, 0, IG_W, 18);
+
+  // ── AVISPONES title ─────────────────────────────────────────────────
+  ctx.fillStyle = C.gold;
+  ctx.font = 'bold 110px Oswald, Arial Narrow, Arial';
+  ctx.textAlign = 'center';
+  ctx.letterSpacing = '6px';
+  ctx.fillText('AVISPONES', IG_W / 2, 155);
+
+  // football emoji row
+  ctx.font = '52px serif';
+  ctx.fillText('🏈', IG_W / 2, 220);
+
+  // ── Category & match labels ─────────────────────────────────────────
+  const category = document.getElementById('categoryName').value.trim();
+  const jornadaSel = document.getElementById('jornadaSelect');
+  const customJ    = document.getElementById('customJornada').value.trim();
+  const jornada    = jornadaSel.value === 'custom' ? customJ
+                   : jornadaSel.value || '';
+
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '500 38px Oswald, Arial';
+  ctx.textAlign = 'center';
+  if (category) ctx.fillText(category.toUpperCase(), IG_W / 2, 278);
+  if (jornada)  ctx.fillText(jornada.toUpperCase(),  IG_W / 2, 326);
+
+  // ── VS divider ──────────────────────────────────────────────────────
+  // Team name cards background
+  const cardY = 370, cardH = 420, cardPad = 60;
+  const halfW  = IG_W / 2 - cardPad;
+  const card1X = cardPad;
+  const card2X = IG_W / 2 + 20;
+  const cardW  = halfW - 20;
+
+  // Avispones card
+  roundRect(ctx, card1X, cardY, cardW, cardH, 28);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+  roundRect(ctx, card1X, cardY, cardW, cardH, 28);
+  ctx.strokeStyle = C.gold;
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Opponent card
+  roundRect(ctx, card2X, cardY, cardW, cardH, 28);
+  ctx.fillStyle = 'rgba(255,255,255,0.07)';
+  ctx.fill();
+  roundRect(ctx, card2X, cardY, cardW, cardH, 28);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Team labels
+  ctx.fillStyle = C.gold;
+  ctx.font = 'bold 44px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('AVISPONES', card1X + cardW / 2, cardY + 72);
+
+  const opponent = document.getElementById('opponentName').value.trim() || 'RIVAL';
+  ctx.fillStyle = C.offwhite;
+  ctx.font = 'bold 44px Oswald, Arial';
+  ctx.fillText(opponent.toUpperCase(), card2X + cardW / 2, cardY + 72);
+
+  // Scores
+  ctx.font = 'bold 220px Oswald, Arial';
+  ctx.fillStyle = C.white;
+  ctx.fillText(String(avisponesScore), card1X + cardW / 2, cardY + 320);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.75)';
+  ctx.fillText(String(opponentScore),  card2X + cardW / 2, cardY + 320);
+
+  // ── VS pill in the middle ────────────────────────────────────────────
+  const vsX = IG_W / 2, vsY = cardY + cardH / 2 + 10;
+  ctx.fillStyle = C.gold;
+  roundRect(ctx, vsX - 42, vsY - 46, 84, 70, 35);
+  ctx.fill();
+  ctx.fillStyle = C.black;
+  ctx.font = 'bold 42px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('VS', vsX, vsY + 14);
+
+  // ── Gold separator line ──────────────────────────────────────────────
+  const sepY = cardY + cardH + 54;
+  ctx.strokeStyle = C.gold;
+  ctx.lineWidth = 3;
+  ctx.globalAlpha = 0.4;
+  ctx.beginPath();
+  ctx.moveTo(80, sepY);
+  ctx.lineTo(IG_W - 80, sepY);
+  ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  // ── Footer ───────────────────────────────────────────────────────────
+  ctx.fillStyle = C.gold;
+  ctx.fillRect(0, IG_H - 18, IG_W, 18);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '500 30px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 40);
+
+  return canvas;
+}
+
+function drawStatsCard() {
+  const canvas = document.createElement('canvas');
+  canvas.width  = IG_W;
+  canvas.height = IG_H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
+  bg.addColorStop(0, '#04200f');
+  bg.addColorStop(1, '#0d5c30');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, IG_W, IG_H);
+
+  // Gold top bar
+  ctx.fillStyle = C.gold;
+  ctx.fillRect(0, 0, IG_W, 18);
+
+  // Title
+  ctx.fillStyle = C.gold;
+  ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('ESTADÍSTICAS', IG_W / 2, 120);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.font = '500 38px Oswald, Arial';
+  const jSel = document.getElementById('jornadaSelect');
+  const jVal = jSel.value === 'custom'
+    ? document.getElementById('customJornada').value.trim()
+    : jSel.value || '';
+  if (jVal) ctx.fillText(jVal.toUpperCase(), IG_W / 2, 170);
+
+  // ── Table helper ──────────────────────────────────────────────────────
+  function drawTable(title, cols, rows, startY) {
+    const PAD = 50;
+    const tableW = IG_W - PAD * 2;
+    const colW = tableW / cols.length;
+    const ROW_H = 68;
+    const HEAD_H = 58;
+
+    // Section title
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 46px Oswald, Arial';
+    ctx.textAlign = 'left';
+    ctx.fillText(title, PAD, startY - 10);
+
+    // Gold underline
+    ctx.fillStyle = C.gold;
+    ctx.fillRect(PAD, startY, 80, 5);
+
+    const tableY = startY + 20;
+
+    // Header row
+    roundRect(ctx, PAD, tableY, tableW, HEAD_H, 14);
+    ctx.fillStyle = C.greenDark;
+    ctx.fill();
+
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 32px Oswald, Arial';
+    ctx.textAlign = 'center';
+    cols.forEach((col, i) => {
+      ctx.fillText(col.toUpperCase(), PAD + colW * i + colW / 2, tableY + 38);
+    });
+
+    // Data rows
+    rows.forEach((row, ri) => {
+      const ry = tableY + HEAD_H + ri * ROW_H;
+      roundRect(ctx, PAD, ry, tableW, ROW_H, 0);
+      ctx.fillStyle = ri % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';
+      ctx.fill();
+
+      ctx.font = ri === 0 ? 'bold 30px Oswald, Arial' : '500 30px Oswald, Arial';
+      row.forEach((cell, ci) => {
+        ctx.fillStyle = ci === 0 ? C.white : 'rgba(255,255,255,0.85)';
+        ctx.textAlign = ci === 0 ? 'left' : 'center';
+        const cx = ci === 0 ? PAD + 18 : PAD + colW * ci + colW / 2;
+        ctx.fillText(String(cell), cx, ry + ROW_H * 0.65);
+      });
+
+      // row divider
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD, ry + ROW_H);
+      ctx.lineTo(PAD + tableW, ry + ROW_H);
+      ctx.stroke();
+    });
+
+    const totalH = HEAD_H + rows.length * ROW_H;
+    // outer border
+    roundRect(ctx, PAD, tableY, tableW, totalH, 14);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    return tableY + totalH;
+  }
+
+  // ── Offense table ────────────────────────────────────────────────────
+  const offPlayers = players.filter(p => p.unit === 'offense');
+  const offRows = offPlayers.length
+    ? offPlayers.map(p => [p.name, p.td, p.catch, p.xp])
+    : [['—', '—', '—', '—']];
+
+  let nextY = drawTable('⚡ OFENSA', ['Jugador','TD','CATCH','XP'], offRows, 215);
+
+  // ── Defense table ─────────────────────────────────────────────────────
+  const defPlayers = players.filter(p => p.unit === 'defense');
+  const defRows = defPlayers.length
+    ? defPlayers.map(p => [p.name, p.int, p.flag, p.sack, p.defTd])
+    : [['—', '—', '—', '—', '—']];
+
+  drawTable('🛡 DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 50);
+
+  // Footer
+  ctx.fillStyle = C.gold;
+  ctx.fillRect(0, IG_H - 18, IG_W, 18);
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  ctx.font = '500 30px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 40);
+
+  return canvas;
+}
+
 function showPreview(canvas, filename) {
   const dataUrl = canvas.toDataURL('image/png');
   const img = document.getElementById('previewImg');
   img.src = dataUrl;
 
-  const dlBtn = document.getElementById('previewDownloadBtn');
+  const dlBtn    = document.getElementById('previewDownloadBtn');
   const shareBtn = document.getElementById('previewShareBtn');
-  const hint = document.getElementById('shareHint');
+  const hint     = document.getElementById('shareHint');
+  hint.style.display = 'none';
 
-  // Save / download
   dlBtn.onclick = () => {
     const a = document.createElement('a');
     a.download = filename;
@@ -588,7 +872,6 @@ function showPreview(canvas, filename) {
     a.click();
   };
 
-  // Web Share API (works on iOS Safari / Android Chrome)
   if (navigator.share && navigator.canShare) {
     shareBtn.style.display = '';
     shareBtn.onclick = async () => {
@@ -609,7 +892,6 @@ function showPreview(canvas, filename) {
       }
     };
   } else {
-    // Fallback for desktop or unsupported browsers
     shareBtn.style.display = 'none';
     hint.style.display = 'block';
     hint.textContent = 'On mobile: long-press the image to save or share it.';
@@ -619,18 +901,11 @@ function showPreview(canvas, filename) {
 }
 
 function exportScore() {
-  const btns = document.querySelector('.game-controls');
-  btns.style.visibility = 'hidden';
-  html2canvas(document.querySelector('#scoreExportArea'), { scale: 2 }).then(canvas => {
-    btns.style.visibility = 'visible';
-    showPreview(canvas, 'avispones_score.png');
-  });
+  showPreview(drawScoreCard(), 'avispones_score.png');
 }
 
 function exportStats() {
-  html2canvas(document.querySelector('#statsExportArea'), { scale: 2 }).then(canvas => {
-    showPreview(canvas, 'avispones_stats.png');
-  });
+  showPreview(drawStatsCard(), 'avispones_stats.png');
 }
 
 </script>
