@@ -142,28 +142,6 @@ button:active { transform: scale(0.95); opacity: 0.85; }
 .export-btn { background: var(--gold); color: black; font-weight: 700; margin: 6px; }
 .reset-btn  { background: #1a1a1a; color: white; margin: 6px; }
 
-.quarter-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin: 12px 0 0;
-  background: rgba(0,0,0,0.2);
-  border-radius: 12px;
-  padding: 12px;
-  max-width: 500px;
-  margin: 12px auto;
-}
-
-.quarter-row label { font-size: 13px; opacity: 0.8; display: block; margin-bottom: 2px; }
-.quarter-row select, .quarter-row input {
-  padding: 7px 10px;
-  font-size: 14px;
-  width: 120px;
-  margin: 0;
-}
-
 hr { border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 40px 0; }
 
 .stat-btn {
@@ -300,28 +278,6 @@ tr:hover td { background: #f5fdf7; }
     <input id="customJornada" placeholder="Custom match name" style="display:none; max-width:180px;">
   </div>
 
-  <div class="quarter-row">
-    <div>
-      <label>Quarter</label>
-      <select id="quarterSelect">
-        <option>Q1</option>
-        <option>Q2</option>
-        <option>Q3</option>
-        <option>Q4</option>
-        <option>OT</option>
-      </select>
-    </div>
-    <div>
-      <label>Down</label>
-      <select id="downSelect">
-        <option>1st Down</option>
-        <option>2nd Down</option>
-        <option>3rd Down</option>
-        <option>4th Down</option>
-      </select>
-    </div>
-  </div>
-
   <div class="score-container">
 
     <div class="team">
@@ -390,6 +346,27 @@ tr:hover td { background: #f5fdf7; }
   <button class="export-btn" onclick="exportStats()">📷 Export Stats Image</button>
 </div>
 
+
+<!-- IMAGE PREVIEW MODAL -->
+<div class="modal" id="previewModal">
+  <div class="modal-box" style="max-width:500px; text-align:center;">
+    <button class="modal-close" onclick="closeModal('previewModal')">✕</button>
+    <h3 style="margin-bottom:6px;">Preview</h3>
+    <p class="subtitle" style="margin-bottom:14px;">Long-press the image to save, or use the buttons below</p>
+    <img id="previewImg" style="width:100%; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.15); display:block; margin-bottom:16px;">
+    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+      <button id="previewDownloadBtn" style="background:#07472a; color:white; flex:1; min-width:120px; padding:13px;">
+        ⬇️ Save Image
+      </button>
+      <button id="previewShareBtn" style="background:#25D366; color:white; flex:1; min-width:120px; padding:13px;">
+        📤 Share
+      </button>
+    </div>
+    <p id="shareHint" style="font-size:12px; color:#999; margin-top:10px; display:none;">
+      Tip: Tap "Share" then choose WhatsApp, Messages, or Save to Camera Roll
+    </p>
+  </div>
+</div>
 
 <!-- STAT MODAL -->
 <div class="modal" id="statModal">
@@ -586,7 +563,7 @@ function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 window.addEventListener('click', e => {
-  ['statModal','playerModal'].forEach(id => {
+  ['statModal','playerModal','previewModal'].forEach(id => {
     const m = document.getElementById(id);
     if (e.target === m) closeModal(id);
   });
@@ -594,29 +571,65 @@ window.addEventListener('click', e => {
 
 // ─── Export ──────────────────────────────────────────────────────────────────
 
-function hideExportBtns(hide) {
-  document.querySelectorAll('.export-btn, .reset-btn, .game-controls').forEach(el => {
-    el.style.visibility = hide ? 'hidden' : 'visible';
-  });
+function showPreview(canvas, filename) {
+  const dataUrl = canvas.toDataURL('image/png');
+  const img = document.getElementById('previewImg');
+  img.src = dataUrl;
+
+  const dlBtn = document.getElementById('previewDownloadBtn');
+  const shareBtn = document.getElementById('previewShareBtn');
+  const hint = document.getElementById('shareHint');
+
+  // Save / download
+  dlBtn.onclick = () => {
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = dataUrl;
+    a.click();
+  };
+
+  // Web Share API (works on iOS Safari / Android Chrome)
+  if (navigator.share && navigator.canShare) {
+    shareBtn.style.display = '';
+    shareBtn.onclick = async () => {
+      try {
+        const blob = await (await fetch(dataUrl)).blob();
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Avispones' });
+        } else {
+          hint.style.display = 'block';
+          hint.textContent = 'Long-press the image above to share or save it.';
+        }
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          hint.style.display = 'block';
+          hint.textContent = 'Long-press the image above to share or save it.';
+        }
+      }
+    };
+  } else {
+    // Fallback for desktop or unsupported browsers
+    shareBtn.style.display = 'none';
+    hint.style.display = 'block';
+    hint.textContent = 'On mobile: long-press the image to save or share it.';
+  }
+
+  openModal('previewModal');
 }
 
 function exportScore() {
-  hideExportBtns(true);
+  const btns = document.querySelector('.game-controls');
+  btns.style.visibility = 'hidden';
   html2canvas(document.querySelector('#scoreExportArea'), { scale: 2 }).then(canvas => {
-    hideExportBtns(false);
-    const link = document.createElement('a');
-    link.download = 'avispones_score.png';
-    link.href = canvas.toDataURL();
-    link.click();
+    btns.style.visibility = 'visible';
+    showPreview(canvas, 'avispones_score.png');
   });
 }
 
 function exportStats() {
   html2canvas(document.querySelector('#statsExportArea'), { scale: 2 }).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'avispones_stats.png';
-    link.href = canvas.toDataURL();
-    link.click();
+    showPreview(canvas, 'avispones_stats.png');
   });
 }
 
