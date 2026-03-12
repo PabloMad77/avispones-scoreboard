@@ -229,7 +229,7 @@ tr:hover td { background: #f5fdf7; }
 }
 .modal-close:hover { background: #ddd; }
 
-.player-btn-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px; }
+.player-btn-grid { display: flex; flex-direction: column; gap: 4px; justify-content: center; margin-top: 8px; width: 100%; }
 .player-btn-grid button { margin: 0; font-size: 15px; padding: 10px 16px; }
 
 .player-list-item {
@@ -379,7 +379,7 @@ tr:hover td { background: #f5fdf7; }
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('statModal')">✕</button>
     <h3 id="statModalTitle">Select Player</h3>
-    <p class="subtitle">Tap a player to add +1</p>
+    <p class="subtitle">Tap + to add or − to remove</p>
     <div class="player-btn-grid" id="statPlayers"></div>
   </div>
 </div>
@@ -507,15 +507,23 @@ function openStat(stat, unit) {
   currentUnit = unit;
 
   document.getElementById('statModalTitle').textContent =
-    `Add ${statLabels[stat] || stat} — ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
+    `${statLabels[stat] || stat} — ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
 
   const pool = players.filter(p => p.unit === unit);
   if (!pool.length) {
     document.getElementById('statPlayers').innerHTML =
       '<p style="color:#999;">No players in this unit. Add some first.</p>';
   } else {
-    document.getElementById('statPlayers').innerHTML =
-      pool.map(p => `<button onclick="addStat(${p.id})" style="background:#e8f5e9; color:#14532d;">${p.name}</button>`).join('');
+    document.getElementById('statPlayers').innerHTML = pool.map(p => `
+      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#f5fdf7; border-radius:10px; padding:10px 14px; margin-bottom:8px;">
+        <span style="font-weight:600; font-size:16px; color:#14532d; flex:1; text-align:left;">${p.name}</span>
+        <span id="statVal-${p.id}" style="font-family:'Oswald',sans-serif; font-size:22px; font-weight:700; color:#07472a; min-width:32px; text-align:center;">${p[stat] || 0}</span>
+        <div style="display:flex; gap:6px; margin-left:12px;">
+          <button onclick="removeStat(${p.id})" style="background:#fee2e2; color:#dc2626; font-size:20px; font-weight:700; padding:6px 14px; border-radius:8px; margin:0;">−</button>
+          <button onclick="addStat(${p.id})" style="background:#14532d; color:white; font-size:20px; font-weight:700; padding:6px 14px; border-radius:8px; margin:0;">+</button>
+        </div>
+      </div>
+    `).join('');
   }
 
   openModal('statModal');
@@ -527,7 +535,20 @@ function addStat(id) {
   p[currentStat] = (p[currentStat] || 0) + 1;
   savePlayers();
   renderAll();
-  closeModal('statModal');
+  // update count in modal without closing
+  const el = document.getElementById(`statVal-${id}`);
+  if (el) el.textContent = p[currentStat];
+}
+
+function removeStat(id) {
+  const p = players.find(x => x.id === id);
+  if (!p) return;
+  p[currentStat] = Math.max(0, (p[currentStat] || 0) - 1);
+  savePlayers();
+  renderAll();
+  // update count in modal without closing
+  const el = document.getElementById(`statVal-${id}`);
+  if (el) el.textContent = p[currentStat];
 }
 
 function renderAll() {
