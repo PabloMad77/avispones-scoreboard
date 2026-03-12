@@ -304,8 +304,8 @@ tr:hover td { background: #f5fdf7; }
 </div>
 
 <div class="game-controls">
-  <button class="export-btn" onclick="exportScore()">📷 Export Score Image</button>
-  <button class="reset-btn" onclick="resetGame()">🔄 Reset Game</button>
+  <button class="export-btn" onclick="exportScore()">Export Score Image</button>
+  <button class="reset-btn" onclick="resetGame()">Reset Game</button>
 </div>
 
 <hr>
@@ -315,7 +315,7 @@ tr:hover td { background: #f5fdf7; }
   <h2>Player Stats</h2>
 
   <button onclick="openPlayerManager()" style="background:#e8f5e9; color:#14532d; font-weight:600; margin-bottom:16px;">
-    👤 Manage Players
+    Manage Players
   </button>
 
   <h3 style="color:var(--gold);">Offense</h3>
@@ -342,7 +342,7 @@ tr:hover td { background: #f5fdf7; }
 </div>
 
 <div style="margin-top:16px;">
-  <button class="export-btn" onclick="exportStats()">📷 Export Stats Image</button>
+  <button class="export-btn" onclick="exportStats()">Export Stats Image</button>
 </div>
 
 
@@ -395,7 +395,7 @@ tr:hover td { background: #f5fdf7; }
         </select>
       </div>
       <button onclick="addPlayer()" style="background:var(--green); color:white; margin-top:10px; width:100%; padding:12px;">
-        ✚ Add Player
+        Add Player
       </button>
     </div>
   </div>
@@ -598,7 +598,7 @@ function roundRect(ctx, x, y, w, h, r) {
   ctx.closePath();
 }
 
-function drawScoreCard() {
+function drawScoreCard(logo) {
   const canvas = document.createElement('canvas');
   canvas.width  = IG_W;
   canvas.height = IG_H;
@@ -629,29 +629,15 @@ function drawScoreCard() {
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, 0, IG_W, 18);
 
-  // ── AVISPONES title ─────────────────────────────────────────────────
-  ctx.fillStyle = C.gold;
-  ctx.font = 'bold 110px Oswald, Arial Narrow, Arial';
-  ctx.textAlign = 'center';
-  ctx.letterSpacing = '6px';
-  ctx.fillText('AVISPONES', IG_W / 2, 155);
-
-  // football emoji row
-  ctx.font = '52px serif';
-  ctx.fillText('🏈', IG_W / 2, 220);
-
-  // ── Category & match labels ─────────────────────────────────────────
-  const category = document.getElementById('categoryName').value.trim();
-  const jornadaSel = document.getElementById('jornadaSelect');
-  const customJ    = document.getElementById('customJornada').value.trim();
-  const jornada    = jornadaSel.value === 'custom' ? customJ
-                   : jornadaSel.value || '';
-
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.font = '500 38px Oswald, Arial';
-  ctx.textAlign = 'center';
-  if (category) ctx.fillText(category.toUpperCase(), IG_W / 2, 278);
-  if (jornada)  ctx.fillText(jornada.toUpperCase(),  IG_W / 2, 326);
+  // ── Logo / title ─────────────────────────────────────────────────────
+  if (logo) {
+    drawLogo(ctx, logo, IG_W / 2, 190, 280);
+  } else {
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 110px Oswald, Arial Narrow, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('AVISPONES', IG_W / 2, 155);
+  }
 
   // ── VS divider ──────────────────────────────────────────────────────
   // Team name cards background
@@ -719,19 +705,12 @@ function drawScoreCard() {
   ctx.stroke();
   ctx.globalAlpha = 1;
 
-  // ── Footer ───────────────────────────────────────────────────────────
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, IG_H - 18, IG_W, 18);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '500 30px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 40);
+  drawFooter(ctx);
 
   return canvas;
 }
 
-function drawStatsCard() {
+function drawStatsCard(logo) {
   const canvas = document.createElement('canvas');
   canvas.width  = IG_W;
   canvas.height = IG_H;
@@ -748,19 +727,19 @@ function drawStatsCard() {
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, 0, IG_W, 18);
 
-  // Title
-  ctx.fillStyle = C.gold;
-  ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('ESTADÍSTICAS', IG_W / 2, 120);
-
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.font = '500 38px Oswald, Arial';
-  const jSel = document.getElementById('jornadaSelect');
-  const jVal = jSel.value === 'custom'
-    ? document.getElementById('customJornada').value.trim()
-    : jSel.value || '';
-  if (jVal) ctx.fillText(jVal.toUpperCase(), IG_W / 2, 170);
+  // ── Logo + title ──────────────────────────────────────────────────────
+  if (logo) {
+    drawLogo(ctx, logo, IG_W / 2, 100, 150);
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 80px Oswald, Arial Narrow, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESTADÍSTICAS', IG_W / 2, 230);
+  } else {
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESTADÍSTICAS', IG_W / 2, 120);
+  }
 
   // ── Table helper ──────────────────────────────────────────────────────
   function drawTable(title, cols, rows, startY) {
@@ -830,27 +809,23 @@ function drawStatsCard() {
 
   // ── Offense table ────────────────────────────────────────────────────
   const offPlayers = players.filter(p => p.unit === 'offense');
-  const offRows = offPlayers.length
-    ? offPlayers.map(p => [p.name, p.td, p.catch, p.xp])
+  const offWithStats = offPlayers.filter(p => p.td > 0 || p.catch > 0 || p.xp > 0);
+  const offRows = offWithStats.length
+    ? offWithStats.map(p => [p.name, p.td, p.catch, p.xp])
     : [['—', '—', '—', '—']];
 
-  let nextY = drawTable('⚡ OFENSA', ['Jugador','TD','CATCH','XP'], offRows, 215);
+  let nextY = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, logo ? 275 : 215);
 
   // ── Defense table ─────────────────────────────────────────────────────
   const defPlayers = players.filter(p => p.unit === 'defense');
-  const defRows = defPlayers.length
-    ? defPlayers.map(p => [p.name, p.int, p.flag, p.sack, p.defTd])
+  const defWithStats = defPlayers.filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
+  const defRows = defWithStats.length
+    ? defWithStats.map(p => [p.name, p.int, p.flag, p.sack, p.defTd])
     : [['—', '—', '—', '—', '—']];
 
-  drawTable('🛡 DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 50);
+  drawTable('DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 90);
 
-  // Footer
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, IG_H - 18, IG_W, 18);
-  ctx.fillStyle = 'rgba(255,255,255,0.3)';
-  ctx.font = '500 30px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 40);
+  drawFooter(ctx);
 
   return canvas;
 }
@@ -900,12 +875,73 @@ function showPreview(canvas, filename) {
   openModal('previewModal');
 }
 
+function getMetaInfo() {
+  const category = document.getElementById('categoryName').value.trim();
+  const jornadaSel = document.getElementById('jornadaSelect');
+  const customJ    = document.getElementById('customJornada').value.trim();
+  const jornada    = jornadaSel.value === 'custom' ? customJ : jornadaSel.value || '';
+  const now        = new Date();
+  const timestamp  = now.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+                   + '  •  '
+                   + now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  return { category, jornada, timestamp };
+}
+
+function drawFooter(ctx) {
+  const { category, jornada, timestamp } = getMetaInfo();
+
+  // Gold bottom bar
+  ctx.fillStyle = C.gold;
+  ctx.fillRect(0, IG_H - 18, IG_W, 18);
+
+  // Team name line
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.font = '500 28px Oswald, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 110);
+
+  // Category · Match
+  const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
+  if (metaLine) {
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 30px Oswald, Arial';
+    ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 72);
+  }
+
+  // Timestamp
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.font = '400 24px Oswald, Arial';
+  ctx.fillText(timestamp, IG_W / 2, IG_H - 36);
+}
+
+const LOGO_URL = 'https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG';
+
+function loadLogo() {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => resolve(img);
+    img.onerror = () => resolve(null); // gracefully skip if logo fails
+    img.src = LOGO_URL;
+  });
+}
+
+function drawLogo(ctx, img, x, y, size) {
+  if (!img) return;
+  // draw centered at (x, y) with given size
+  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+}
+
 function exportScore() {
-  showPreview(drawScoreCard(), 'avispones_score.png');
+  loadLogo().then(logo => {
+    showPreview(drawScoreCard(logo), 'avispones_score.png');
+  });
 }
 
 function exportStats() {
-  showPreview(drawStatsCard(), 'avispones_stats.png');
+  loadLogo().then(logo => {
+    showPreview(drawStatsCard(logo), 'avispones_stats.png');
+  });
 }
 
 </script>
