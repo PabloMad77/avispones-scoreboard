@@ -353,17 +353,10 @@ tr:hover td { background: #f5fdf7; }
     <h3 style="margin-bottom:6px;">Preview</h3>
     <p class="subtitle" style="margin-bottom:14px;">Long-press the image to save, or use the buttons below</p>
     <img id="previewImg" style="width:100%; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.15); display:block; margin-bottom:16px;">
-    <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-      <button id="previewDownloadBtn" style="background:#07472a; color:white; flex:1; min-width:120px; padding:13px;">
-        ⬇️ Save Image
-      </button>
-      <button id="previewShareBtn" style="background:#25D366; color:white; flex:1; min-width:120px; padding:13px;">
-        📤 Share
-      </button>
-    </div>
-    <p id="shareHint" style="font-size:12px; color:#999; margin-top:10px; display:none;">
-      Tip: Tap "Share" then choose WhatsApp, Messages, or Save to Camera Roll
-    </p>
+    <button id="previewActionBtn" style="background:#07472a; color:white; width:100%; padding:14px; font-size:17px;">
+      Save / Share
+    </button>
+    <p id="shareHint" style="font-size:12px; color:#999; margin-top:10px; display:none;"></p>
   </div>
 </div>
 
@@ -727,11 +720,25 @@ function drawStatsCard(logo) {
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, 0, IG_W, 18);
 
-  // ── Title near top ────────────────────────────────────────────────────
-  ctx.fillStyle = C.gold;
-  ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('ESTADÍSTICAS', IG_W / 2, 110);
+  // ── Logo + Title inline at top ────────────────────────────────────────
+  const TITLE_Y = 200;
+  if (logo) {
+    const logoSize = 90;
+    // measure title width to center the logo+title group
+    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
+    const titleW = ctx.measureText('ESTADÍSTICAS').width;
+    const groupW = logoSize + 20 + titleW;
+    const groupX = (IG_W - groupW) / 2;
+    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
+    ctx.fillStyle = C.gold;
+    ctx.textAlign = 'left';
+    ctx.fillText('ESTADÍSTICAS', groupX + logoSize + 20, TITLE_Y);
+  } else {
+    ctx.fillStyle = C.gold;
+    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ESTADÍSTICAS', IG_W / 2, TITLE_Y);
+  }
 
   // ── Table helper ──────────────────────────────────────────────────────
   function drawTable(title, cols, rows, startY) {
@@ -740,23 +747,16 @@ function drawStatsCard(logo) {
     const colW = tableW / cols.length;
     const ROW_H = 68;
     const HEAD_H = 58;
-    const LOGO_SIZE = 52;
-    const TITLE_X = logo ? PAD + LOGO_SIZE + 14 : PAD;
 
-    // Logo aligned with section title
-    if (logo) {
-      ctx.drawImage(logo, PAD, startY - LOGO_SIZE - 2, LOGO_SIZE, LOGO_SIZE);
-    }
-
-    // Section title
+    // Section title (no logo here anymore)
     ctx.fillStyle = C.gold;
     ctx.font = 'bold 46px Oswald, Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(title, TITLE_X, startY - 10);
+    ctx.fillText(title, PAD, startY - 10);
 
-    // Gold underline (starts after logo if present)
+    // Gold underline
     ctx.fillStyle = C.gold;
-    ctx.fillRect(TITLE_X, startY, 80, 5);
+    ctx.fillRect(PAD, startY, 80, 5);
 
     const tableY = startY + 20;
 
@@ -831,45 +831,32 @@ function drawStatsCard(logo) {
 
 function showPreview(canvas, filename) {
   const dataUrl = canvas.toDataURL('image/png');
-  const img = document.getElementById('previewImg');
-  img.src = dataUrl;
+  document.getElementById('previewImg').src = dataUrl;
 
-  const dlBtn    = document.getElementById('previewDownloadBtn');
-  const shareBtn = document.getElementById('previewShareBtn');
-  const hint     = document.getElementById('shareHint');
+  const btn  = document.getElementById('previewActionBtn');
+  const hint = document.getElementById('shareHint');
   hint.style.display = 'none';
 
-  dlBtn.onclick = () => {
-    const a = document.createElement('a');
-    a.download = filename;
-    a.href = dataUrl;
-    a.click();
-  };
-
-  if (navigator.share && navigator.canShare) {
-    shareBtn.style.display = '';
-    shareBtn.onclick = async () => {
+  btn.onclick = async () => {
+    // Try native share sheet first (iOS / Android) — opens WhatsApp, Camera Roll, etc.
+    if (navigator.share && navigator.canShare) {
       try {
         const blob = await (await fetch(dataUrl)).blob();
         const file = new File([blob], filename, { type: 'image/png' });
         if (navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], title: 'Avispones' });
-        } else {
-          hint.style.display = 'block';
-          hint.textContent = 'Long-press the image above to share or save it.';
+          return;
         }
       } catch (e) {
-        if (e.name !== 'AbortError') {
-          hint.style.display = 'block';
-          hint.textContent = 'Long-press the image above to share or save it.';
-        }
+        if (e.name === 'AbortError') return; // user cancelled — do nothing
       }
-    };
-  } else {
-    shareBtn.style.display = 'none';
-    hint.style.display = 'block';
-    hint.textContent = 'On mobile: long-press the image to save or share it.';
-  }
+    }
+    // Fallback: direct download
+    const a = document.createElement('a');
+    a.download = filename;
+    a.href = dataUrl;
+    a.click();
+  };
 
   openModal('previewModal');
 }
