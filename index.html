@@ -727,19 +727,11 @@ function drawStatsCard(logo) {
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, 0, IG_W, 18);
 
-  // ── Logo + title ──────────────────────────────────────────────────────
-  if (logo) {
-    drawLogo(ctx, logo, IG_W / 2, 100, 150);
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 80px Oswald, Arial Narrow, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('ESTADÍSTICAS', IG_W / 2, 230);
-  } else {
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('ESTADÍSTICAS', IG_W / 2, 120);
-  }
+  // ── Title near top ────────────────────────────────────────────────────
+  ctx.fillStyle = C.gold;
+  ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
+  ctx.textAlign = 'center';
+  ctx.fillText('ESTADÍSTICAS', IG_W / 2, 110);
 
   // ── Table helper ──────────────────────────────────────────────────────
   function drawTable(title, cols, rows, startY) {
@@ -748,16 +740,23 @@ function drawStatsCard(logo) {
     const colW = tableW / cols.length;
     const ROW_H = 68;
     const HEAD_H = 58;
+    const LOGO_SIZE = 52;
+    const TITLE_X = logo ? PAD + LOGO_SIZE + 14 : PAD;
+
+    // Logo aligned with section title
+    if (logo) {
+      ctx.drawImage(logo, PAD, startY - LOGO_SIZE - 2, LOGO_SIZE, LOGO_SIZE);
+    }
 
     // Section title
     ctx.fillStyle = C.gold;
     ctx.font = 'bold 46px Oswald, Arial';
     ctx.textAlign = 'left';
-    ctx.fillText(title, PAD, startY - 10);
+    ctx.fillText(title, TITLE_X, startY - 10);
 
-    // Gold underline
+    // Gold underline (starts after logo if present)
     ctx.fillStyle = C.gold;
-    ctx.fillRect(PAD, startY, 80, 5);
+    ctx.fillRect(TITLE_X, startY, 80, 5);
 
     const tableY = startY + 20;
 
@@ -814,7 +813,7 @@ function drawStatsCard(logo) {
     ? offWithStats.map(p => [p.name, p.td, p.catch, p.xp])
     : [['—', '—', '—', '—']];
 
-  let nextY = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, logo ? 275 : 215);
+  let nextY = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, 215);
 
   // ── Defense table ─────────────────────────────────────────────────────
   const defPlayers = players.filter(p => p.unit === 'defense');
