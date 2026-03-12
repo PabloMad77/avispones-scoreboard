@@ -729,6 +729,15 @@ function drawStatsCard(logo) {
     const titleW = ctx.measureText('ESTADÍSTICAS').width;
     const groupW = logoSize + 20 + titleW;
     const groupX = (IG_W - groupW) / 2;
+    // Draw logo with gold glow
+    ctx.save();
+    ctx.shadowColor = C.gold;
+    ctx.shadowBlur = 35;
+    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
+    ctx.shadowBlur = 70;
+    ctx.globalAlpha = 0.35;
+    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
+    ctx.restore();
     ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
     ctx.fillStyle = C.gold;
     ctx.textAlign = 'left';
@@ -914,7 +923,16 @@ function loadLogo() {
 
 function drawLogo(ctx, img, x, y, size) {
   if (!img) return;
-  // draw centered at (x, y) with given size
+  ctx.save();
+  // Gold glow using layered radial shadows
+  ctx.shadowColor = C.gold;
+  ctx.shadowBlur = 40;
+  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+  ctx.shadowBlur = 80;
+  ctx.globalAlpha = 0.4;
+  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+  ctx.restore();
+  // Draw crisp logo on top without shadow
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
 }
 
