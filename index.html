@@ -375,7 +375,12 @@ tr:hover td { background: #f5fdf7; }
     Manage Players
   </button>
 
-  <h3 style="color:var(--gold);">Offense</h3>
+  <div style="position:relative; margin: 32px 0 16px;">
+    <div style="position:absolute; left:50%; transform:translateX(-50%); top:50%; width:80%; height:2px; background:linear-gradient(90deg, transparent, rgba(255,208,0,0.4), transparent;"></div>
+    <h3 style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:700; letter-spacing:6px; text-transform:uppercase; color:var(--gold); margin:0; text-shadow:0 0 20px rgba(255,208,0,0.4);">
+      — &nbsp; OFFENSE &nbsp; —
+    </h3>
+  </div>
   <div>
     <button class="stat-btn" onclick="openStat('td','offense')">TD</button>
     <button class="stat-btn" onclick="openStat('catch','offense')">CATCH</button>
@@ -385,7 +390,11 @@ tr:hover td { background: #f5fdf7; }
     <tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>
   </table>
 
-  <h3 style="color:var(--gold); margin-top:28px;">Defense</h3>
+  <div style="position:relative; margin: 40px 0 16px;">
+    <h3 style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:700; letter-spacing:6px; text-transform:uppercase; color:var(--gold); margin:0; text-shadow:0 0 20px rgba(255,208,0,0.4);">
+      — &nbsp; DEFENSE &nbsp; —
+    </h3>
+  </div>
   <div>
     <button class="stat-btn" onclick="openStat('int','defense')">INT</button>
     <button class="stat-btn" onclick="openStat('flag','defense')">FLAG</button>
@@ -400,6 +409,7 @@ tr:hover td { background: #f5fdf7; }
 
 <div style="margin-top:16px;">
   <button class="export-btn" onclick="exportStats()">Export Stats Image</button>
+  <button class="reset-btn" onclick="resetStats()">Reset Stats</button>
 </div>
 
 
@@ -860,7 +870,7 @@ function drawStatsCard(logo) {
   if (logo) {
     const logoSize = 90;
     ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-    const titleW = ctx.measureText('ESTADÍSTICAS').width;
+    const titleW = ctx.measureText('GAME STATS').width;
     const groupW = logoSize + 20 + titleW;
     const groupX = (IG_W - groupW) / 2;
     ctx.save();
@@ -874,12 +884,12 @@ function drawStatsCard(logo) {
     ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
     ctx.fillStyle = C.gold;
     ctx.textAlign = 'left';
-    ctx.fillText('ESTADÍSTICAS', groupX + logoSize + 20, TITLE_Y);
+    ctx.fillText('GAME STATS', groupX + logoSize + 20, TITLE_Y);
   } else {
     ctx.fillStyle = C.gold;
     ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('ESTADÍSTICAS', IG_W / 2, TITLE_Y);
+    ctx.fillText('GAME STATS', IG_W / 2, TITLE_Y);
   }
 
   // ── Table helper ──────────────────────────────────────────────────────
@@ -987,7 +997,7 @@ function drawStatsCard(logo) {
       ])
     : [['—', '—', '—', '—', '—']];
 
-  let nextY = drawTable('OFENSA', ['#','Jugador','TD','CATCH','XP'], offRows, 215);
+  let nextY = drawTable('OFFENSE', ['#','Player','TD','CATCH','XP'], offRows, 215);
 
   // ── Defense table ─────────────────────────────────────────────────────
   const defPlayers = sortedByJersey(players.filter(p => p.unit === 'defense'));
@@ -999,7 +1009,7 @@ function drawStatsCard(logo) {
       ])
     : [['—', '—', '—', '—', '—', '—']];
 
-  drawTable('DEFENSA', ['#','Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 90);
+  drawTable('DEFENSE', ['#','Player','INT','FLAG','SACK','TD'], defRows, nextY + 90);
 
   drawFooter(ctx);
 
@@ -1094,6 +1104,13 @@ function drawLogo(ctx, img, x, y, size) {
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
   ctx.restore();
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+}
+
+function resetStats() {
+  if (!confirm('Reset all player stats? Players will be kept but all stats cleared.')) return;
+  players = players.map(p => ({ ...p, td: 0, catch: 0, xp: 0, int: 0, flag: 0, sack: 0, defTd: 0 }));
+  savePlayers();
+  renderAll();
 }
 
 function exportScore() {
