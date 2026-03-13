@@ -399,10 +399,11 @@ tr:hover td { background: #f5fdf7; }
     <button class="stat-btn" onclick="openStat('int','defense')">INT</button>
     <button class="stat-btn" onclick="openStat('flag','defense')">FLAG</button>
     <button class="stat-btn" onclick="openStat('sack','defense')">SACK</button>
+    <button class="stat-btn" onclick="openStat('safety','defense')">SAFETY</button>
     <button class="stat-btn" onclick="openStat('defTd','defense')">TD</button>
   </div>
   <table id="defenseTable">
-    <tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>
+    <tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>SFT</th><th>TD</th></tr>
   </table>
 
 </div>
@@ -578,7 +579,7 @@ function addPlayer() {
 
   players.push({ id: Date.now(), name, unit, jersey,
     td: 0, catch: 0, xp: 0,
-    int: 0, flag: 0, sack: 0, defTd: 0
+    int: 0, flag: 0, sack: 0, safety: 0, defTd: 0
   });
 
   document.getElementById('newPlayerName').value = '';
@@ -602,7 +603,7 @@ function removePlayer(id) {
 let currentStat = '';
 let currentUnit = '';
 
-const statLabels = { td:'TD', catch:'CATCH', xp:'XP', int:'INT', flag:'FLAG', sack:'SACK', defTd:'TD (DEF)' };
+const statLabels = { td:'TD', catch:'CATCH', xp:'XP', int:'INT', flag:'FLAG', sack:'SACK', safety:'SAFETY', defTd:'TD (DEF)' };
 
 function openStat(stat, unit) {
   currentStat = stat;
@@ -681,6 +682,7 @@ function renderAll() {
         <td>${p.int}</td>
         <td>${p.flag}</td>
         <td>${p.sack}</td>
+        <td>${p.safety || 0}</td>
         <td>${p.defTd}</td>
       </tr>`;
     }
@@ -1007,9 +1009,9 @@ function drawStatsCard(logo) {
         p.jersey !== '' && p.jersey !== undefined ? `#${p.jersey}` : '—',
         p.name, p.int, p.flag, p.sack, p.defTd
       ])
-    : [['—', '—', '—', '—', '—', '—']];
+    : [['—', '—', '—', '—', '—', '—', '—']];
 
-  drawTable('DEFENSE', ['#','Player','INT','FLAG','SACK','TD'], defRows, nextY + 90);
+  drawTable('DEFENSE', ['#','Player','INT','FLAG','SACK','SFT','TD'], defRows, nextY + 90);
 
   drawFooter(ctx);
 
@@ -1108,7 +1110,7 @@ function drawLogo(ctx, img, x, y, size) {
 
 function resetStats() {
   if (!confirm('Reset all player stats? Players will be kept but all stats cleared.')) return;
-  players = players.map(p => ({ ...p, td: 0, catch: 0, xp: 0, int: 0, flag: 0, sack: 0, defTd: 0 }));
+  players = players.map(p => ({ ...p, td: 0, catch: 0, xp: 0, int: 0, flag: 0, sack: 0, safety: 0, defTd: 0 }));
   savePlayers();
   renderAll();
 }
