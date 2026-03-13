@@ -183,6 +183,20 @@ th { background: var(--green-dark); color: white; font-family: 'Oswald', sans-se
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #f5fdf7; }
 
+/* Jersey number badge in table */
+.jersey-badge {
+  display: inline-block;
+  background: var(--green-dark);
+  color: var(--gold);
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 1px 7px;
+  border-radius: 20px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
 /* MODALS */
 .modal {
   display: none;
@@ -248,6 +262,19 @@ tr:hover td { background: #f5fdf7; }
   border-radius: 20px;
   margin-left: 8px;
 }
+.player-list-item .jersey-num {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--green-dark);
+  color: var(--gold);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-right: 8px;
+  min-width: 36px;
+  text-align: center;
+  display: inline-block;
+}
 .remove-btn { background: #fee2e2; color: #dc2626; font-size: 13px; padding: 4px 10px; border-radius: 6px; }
 
 .modal-box input, .modal-box select {
@@ -259,9 +286,25 @@ tr:hover td { background: #f5fdf7; }
 .modal-box input:focus { border-color: var(--green); }
 
 .add-player-row { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 12px; }
-.add-player-row input { flex: 1; min-width: 120px; }
+.add-player-row input { flex: 1; min-width: 100px; }
+.add-player-row .jersey-input { max-width: 80px; flex: 0 0 80px; }
 
 .subtitle { opacity: 0.7; font-size: 14px; margin: 0 0 16px; }
+
+/* Jersey number in stat modal */
+.stat-jersey {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  background: #07472a;
+  color: #ffd000;
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-right: 8px;
+  min-width: 36px;
+  text-align: center;
+  display: inline-block;
+}
 </style>
 </head>
 
@@ -339,7 +382,7 @@ tr:hover td { background: #f5fdf7; }
     <button class="stat-btn" onclick="openStat('xp','offense')">XP</button>
   </div>
   <table id="offenseTable">
-    <tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>
+    <tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>
   </table>
 
   <h3 style="color:var(--gold); margin-top:28px;">Defense</h3>
@@ -350,7 +393,7 @@ tr:hover td { background: #f5fdf7; }
     <button class="stat-btn" onclick="openStat('defTd','defense')">TD</button>
   </div>
   <table id="defenseTable">
-    <tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>
+    <tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>
   </table>
 
 </div>
@@ -395,6 +438,7 @@ tr:hover td { background: #f5fdf7; }
     <div style="background:#f5f5f5; border-radius:10px; padding:16px;">
       <strong style="display:block; margin-bottom:8px; color:#333;">Add New Player</strong>
       <div class="add-player-row">
+        <input id="newPlayerJersey" class="jersey-input" placeholder="#" type="number" min="0" max="99">
         <input id="newPlayerName" placeholder="Player name">
         <select id="newPlayerUnit" style="background:#f5f5f5; color:#111; border:2px solid #e0e0e0;">
           <option value="offense">Offense</option>
@@ -448,8 +492,20 @@ function handleJornadaChange() {
 
 let players = JSON.parse(localStorage.getItem('players') || '[]');
 
+// Migrate old players that may lack jersey field
+players = players.map(p => ({ jersey: '', ...p }));
+
 function savePlayers() {
   localStorage.setItem('players', JSON.stringify(players));
+}
+
+// Sort players by jersey number (numeric). Players with no number go to end.
+function sortedByJersey(arr) {
+  return [...arr].sort((a, b) => {
+    const na = a.jersey !== '' && a.jersey !== null && a.jersey !== undefined ? Number(a.jersey) : Infinity;
+    const nb = b.jersey !== '' && b.jersey !== null && b.jersey !== undefined ? Number(b.jersey) : Infinity;
+    return na - nb;
+  });
 }
 
 function openPlayerManager() {
@@ -463,25 +519,36 @@ function renderPlayerList() {
     container.innerHTML = '<p style="color:#999; text-align:center;">No players yet.</p>';
     return;
   }
-  container.innerHTML = players.map(p => `
+
+  const sorted = sortedByJersey(players);
+
+  container.innerHTML = sorted.map(p => `
     <div class="player-list-item">
-      <span>${p.name}<span class="unit-badge">${p.unit}</span></span>
+      <span>
+        <span class="jersey-num">${p.jersey !== '' && p.jersey !== undefined ? '#' + p.jersey : '—'}</span>
+        ${p.name}
+        <span class="unit-badge">${p.unit}</span>
+      </span>
       <button class="remove-btn" onclick="removePlayer(${p.id})">Remove</button>
     </div>
   `).join('');
 }
 
 function addPlayer() {
-  const name = document.getElementById('newPlayerName').value.trim();
-  const unit = document.getElementById('newPlayerUnit').value;
+  const name    = document.getElementById('newPlayerName').value.trim();
+  const unit    = document.getElementById('newPlayerUnit').value;
+  const jerseyRaw = document.getElementById('newPlayerJersey').value.trim();
+  const jersey  = jerseyRaw !== '' ? jerseyRaw : '';
+
   if (!name) return;
 
-  players.push({ id: Date.now(), name, unit,
+  players.push({ id: Date.now(), name, unit, jersey,
     td: 0, catch: 0, xp: 0,
     int: 0, flag: 0, sack: 0, defTd: 0
   });
 
   document.getElementById('newPlayerName').value = '';
+  document.getElementById('newPlayerJersey').value = '';
   savePlayers();
   renderPlayerList();
   renderAll();
@@ -509,14 +576,17 @@ function openStat(stat, unit) {
   document.getElementById('statModalTitle').textContent =
     `${statLabels[stat] || stat} — ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
 
-  const pool = players.filter(p => p.unit === unit);
+  const pool = sortedByJersey(players.filter(p => p.unit === unit));
   if (!pool.length) {
     document.getElementById('statPlayers').innerHTML =
       '<p style="color:#999;">No players in this unit. Add some first.</p>';
   } else {
     document.getElementById('statPlayers').innerHTML = pool.map(p => `
       <div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#f5fdf7; border-radius:10px; padding:10px 14px; margin-bottom:8px;">
-        <span style="font-weight:600; font-size:16px; color:#14532d; flex:1; text-align:left;">${p.name}</span>
+        <span style="font-weight:600; font-size:16px; color:#14532d; flex:1; text-align:left; display:flex; align-items:center; gap:6px;">
+          ${p.jersey !== '' && p.jersey !== undefined ? `<span class="stat-jersey">#${p.jersey}</span>` : ''}
+          ${p.name}
+        </span>
         <span id="statVal-${p.id}" style="font-family:'Oswald',sans-serif; font-size:22px; font-weight:700; color:#07472a; min-width:32px; text-align:center;">${p[stat] || 0}</span>
         <div style="display:flex; gap:6px; margin-left:12px;">
           <button onclick="removeStat(${p.id})" style="background:#fee2e2; color:#dc2626; font-size:20px; font-weight:700; padding:6px 14px; border-radius:8px; margin:0;">−</button>
@@ -535,7 +605,6 @@ function addStat(id) {
   p[currentStat] = (p[currentStat] || 0) + 1;
   savePlayers();
   renderAll();
-  // update count in modal without closing
   const el = document.getElementById(`statVal-${id}`);
   if (el) el.textContent = p[currentStat];
 }
@@ -546,7 +615,6 @@ function removeStat(id) {
   p[currentStat] = Math.max(0, (p[currentStat] || 0) - 1);
   savePlayers();
   renderAll();
-  // update count in modal without closing
   const el = document.getElementById(`statVal-${id}`);
   if (el) el.textContent = p[currentStat];
 }
@@ -555,9 +623,16 @@ function renderAll() {
   let offenseRows = '';
   let defenseRows = '';
 
-  players.forEach(p => {
+  const sortedPlayers = sortedByJersey(players);
+
+  sortedPlayers.forEach(p => {
+    const jerseyCell = p.jersey !== '' && p.jersey !== undefined
+      ? `<td style="font-family:'Oswald',sans-serif; font-weight:700; color:var(--green-dark);">#${p.jersey}</td>`
+      : `<td style="color:#aaa;">—</td>`;
+
     if (p.unit === 'offense') {
       offenseRows += `<tr>
+        ${jerseyCell}
         <td>${p.name}</td>
         <td>${p.td}</td>
         <td>${p.catch}</td>
@@ -566,6 +641,7 @@ function renderAll() {
     }
     if (p.unit === 'defense') {
       defenseRows += `<tr>
+        ${jerseyCell}
         <td>${p.name}</td>
         <td>${p.int}</td>
         <td>${p.flag}</td>
@@ -576,10 +652,10 @@ function renderAll() {
   });
 
   document.getElementById('offenseTable').innerHTML =
-    `<tr><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>` + offenseRows;
+    `<tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>` + offenseRows;
 
   document.getElementById('defenseTable').innerHTML =
-    `<tr><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>` + defenseRows;
+    `<tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>` + defenseRows;
 }
 
 renderAll();
@@ -668,7 +744,6 @@ function drawScoreCard(logo) {
   }
 
   // ── VS divider ──────────────────────────────────────────────────────
-  // Team name cards background
   const cardY = 370, cardH = 420, cardPad = 60;
   const halfW  = IG_W / 2 - cardPad;
   const card1X = cardPad;
@@ -759,12 +834,10 @@ function drawStatsCard(logo) {
   const TITLE_Y = 140;
   if (logo) {
     const logoSize = 90;
-    // measure title width to center the logo+title group
     ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
     const titleW = ctx.measureText('ESTADÍSTICAS').width;
     const groupW = logoSize + 20 + titleW;
     const groupX = (IG_W - groupW) / 2;
-    // Draw logo with gold glow
     ctx.save();
     ctx.shadowColor = C.gold;
     ctx.shadowBlur = 35;
@@ -792,13 +865,11 @@ function drawStatsCard(logo) {
     const ROW_H = 68;
     const HEAD_H = 58;
 
-    // Section title (no logo here anymore)
     ctx.fillStyle = C.gold;
     ctx.font = 'bold 46px Oswald, Arial';
     ctx.textAlign = 'left';
     ctx.fillText(title, PAD, startY - 10);
 
-    // Gold underline
     ctx.fillStyle = C.gold;
     ctx.fillRect(PAD, startY, 80, 5);
 
@@ -825,10 +896,42 @@ function drawStatsCard(logo) {
 
       ctx.font = ri === 0 ? 'bold 30px Oswald, Arial' : '500 30px Oswald, Arial';
       row.forEach((cell, ci) => {
-        ctx.fillStyle = ci === 0 ? C.white : 'rgba(255,255,255,0.85)';
-        ctx.textAlign = ci === 0 ? 'left' : 'center';
-        const cx = ci === 0 ? PAD + 18 : PAD + colW * ci + colW / 2;
-        ctx.fillText(String(cell), cx, ry + ROW_H * 0.65);
+        // First column = jersey # (right-aligned), second column = name (left-aligned)
+        if (ci === 0) {
+          // Jersey number pill
+          const pillText = cell !== '—' ? cell : '—';
+          const pillX = PAD + colW * 0 + colW / 2;
+          const pillY = ry + ROW_H * 0.65;
+          // Draw small gold pill
+          if (cell !== '—') {
+            ctx.save();
+            const pillW = 64, pillH = 34, pillR = 17;
+            roundRect(ctx, pillX - pillW/2, pillY - pillH + 8, pillW, pillH, pillR);
+            ctx.fillStyle = C.gold;
+            ctx.fill();
+            ctx.fillStyle = C.greenDark;
+            ctx.font = 'bold 26px Oswald, Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(pillText, pillX, pillY + 4);
+            ctx.restore();
+          } else {
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.font = '400 26px Oswald, Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('—', pillX, pillY + 4);
+          }
+        } else if (ci === 1) {
+          // Player name - left aligned
+          ctx.fillStyle = C.white;
+          ctx.font = '600 30px Oswald, Arial';
+          ctx.textAlign = 'left';
+          ctx.fillText(String(cell), PAD + colW + 14, ry + ROW_H * 0.65);
+        } else {
+          ctx.fillStyle = 'rgba(255,255,255,0.85)';
+          ctx.font = '500 30px Oswald, Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText(String(cell), PAD + colW * ci + colW / 2, ry + ROW_H * 0.65);
+        }
       });
 
       // row divider
@@ -841,7 +944,6 @@ function drawStatsCard(logo) {
     });
 
     const totalH = HEAD_H + rows.length * ROW_H;
-    // outer border
     roundRect(ctx, PAD, tableY, tableW, totalH, 14);
     ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 2;
@@ -851,22 +953,28 @@ function drawStatsCard(logo) {
   }
 
   // ── Offense table ────────────────────────────────────────────────────
-  const offPlayers = players.filter(p => p.unit === 'offense');
+  const offPlayers = sortedByJersey(players.filter(p => p.unit === 'offense'));
   const offWithStats = offPlayers.filter(p => p.td > 0 || p.catch > 0 || p.xp > 0);
   const offRows = offWithStats.length
-    ? offWithStats.map(p => [p.name, p.td, p.catch, p.xp])
-    : [['—', '—', '—', '—']];
-
-  let nextY = drawTable('OFENSA', ['Jugador','TD','CATCH','XP'], offRows, 215);
-
-  // ── Defense table ─────────────────────────────────────────────────────
-  const defPlayers = players.filter(p => p.unit === 'defense');
-  const defWithStats = defPlayers.filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
-  const defRows = defWithStats.length
-    ? defWithStats.map(p => [p.name, p.int, p.flag, p.sack, p.defTd])
+    ? offWithStats.map(p => [
+        p.jersey !== '' && p.jersey !== undefined ? `#${p.jersey}` : '—',
+        p.name, p.td, p.catch, p.xp
+      ])
     : [['—', '—', '—', '—', '—']];
 
-  drawTable('DEFENSA', ['Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 90);
+  let nextY = drawTable('OFENSA', ['#','Jugador','TD','CATCH','XP'], offRows, 215);
+
+  // ── Defense table ─────────────────────────────────────────────────────
+  const defPlayers = sortedByJersey(players.filter(p => p.unit === 'defense'));
+  const defWithStats = defPlayers.filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
+  const defRows = defWithStats.length
+    ? defWithStats.map(p => [
+        p.jersey !== '' && p.jersey !== undefined ? `#${p.jersey}` : '—',
+        p.name, p.int, p.flag, p.sack, p.defTd
+      ])
+    : [['—', '—', '—', '—', '—', '—']];
+
+  drawTable('DEFENSA', ['#','Jugador','INT','FLAG','SACK','TD'], defRows, nextY + 90);
 
   drawFooter(ctx);
 
@@ -882,7 +990,6 @@ function showPreview(canvas, filename) {
   hint.style.display = 'none';
 
   btn.onclick = async () => {
-    // Try native share sheet first (iOS / Android) — opens WhatsApp, Camera Roll, etc.
     if (navigator.share && navigator.canShare) {
       try {
         const blob = await (await fetch(dataUrl)).blob();
@@ -892,10 +999,9 @@ function showPreview(canvas, filename) {
           return;
         }
       } catch (e) {
-        if (e.name === 'AbortError') return; // user cancelled — do nothing
+        if (e.name === 'AbortError') return;
       }
     }
-    // Fallback: direct download
     const a = document.createElement('a');
     a.download = filename;
     a.href = dataUrl;
@@ -920,17 +1026,14 @@ function getMetaInfo() {
 function drawFooter(ctx) {
   const { category, jornada, timestamp } = getMetaInfo();
 
-  // Gold bottom bar
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, IG_H - 18, IG_W, 18);
 
-  // Team name line
   ctx.fillStyle = 'rgba(255,255,255,0.35)';
   ctx.font = '500 28px Oswald, Arial';
   ctx.textAlign = 'center';
   ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 110);
 
-  // Category · Match
   const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
   if (metaLine) {
     ctx.fillStyle = C.gold;
@@ -938,7 +1041,6 @@ function drawFooter(ctx) {
     ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 72);
   }
 
-  // Timestamp
   ctx.fillStyle = 'rgba(255,255,255,0.4)';
   ctx.font = '400 24px Oswald, Arial';
   ctx.fillText(timestamp, IG_W / 2, IG_H - 36);
@@ -951,7 +1053,7 @@ function loadLogo() {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     img.onload  = () => resolve(img);
-    img.onerror = () => resolve(null); // gracefully skip if logo fails
+    img.onerror = () => resolve(null);
     img.src = LOGO_URL;
   });
 }
@@ -959,7 +1061,6 @@ function loadLogo() {
 function drawLogo(ctx, img, x, y, size) {
   if (!img) return;
   ctx.save();
-  // Gold glow using layered radial shadows
   ctx.shadowColor = C.gold;
   ctx.shadowBlur = 40;
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
@@ -967,7 +1068,6 @@ function drawLogo(ctx, img, x, y, size) {
   ctx.globalAlpha = 0.4;
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
   ctx.restore();
-  // Draw crisp logo on top without shadow
   ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
 }
 
