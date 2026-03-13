@@ -437,13 +437,24 @@ tr:hover td { background: #f5fdf7; }
 
     <div style="background:#f5f5f5; border-radius:10px; padding:16px;">
       <strong style="display:block; margin-bottom:8px; color:#333;">Add New Player</strong>
+      <div style="display:flex; gap:4px; font-size:11px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; padding:0 2px;">
+        <span style="flex:0 0 76px; text-align:center;">Jersey #</span>
+        <span style="flex:2; padding-left:4px;">Name</span>
+      </div>
       <div class="add-player-row">
-        <input id="newPlayerJersey" class="jersey-input" placeholder="#" type="number" min="0" max="99">
-        <input id="newPlayerName" placeholder="Player name">
-        <select id="newPlayerUnit" style="background:#f5f5f5; color:#111; border:2px solid #e0e0e0;">
-          <option value="offense">Offense</option>
-          <option value="defense">Defense</option>
-        </select>
+        <input id="newPlayerJersey" class="jersey-input" placeholder="e.g. 7" type="text" inputmode="numeric" maxlength="2">
+        <input id="newPlayerName" placeholder="e.g. Juan García" style="flex:2;">
+      </div>
+      <input type="hidden" id="newPlayerUnit" value="offense">
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button id="unitOffenseBtn" onclick="setUnit('offense')" type="button"
+          style="flex:1; padding:10px; border-radius:8px; border:2px solid #07472a; background:#07472a; color:#ffd000; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; cursor:pointer;">
+          OFFENSE
+        </button>
+        <button id="unitDefenseBtn" onclick="setUnit('defense')" type="button"
+          style="flex:1; padding:10px; border-radius:8px; border:2px solid #ddd; background:white; color:#555; font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; cursor:pointer;">
+          DEFENSE
+        </button>
       </div>
       <button onclick="addPlayer()" style="background:var(--green); color:white; margin-top:10px; width:100%; padding:12px;">
         Add Player
@@ -495,6 +506,19 @@ let players = JSON.parse(localStorage.getItem('players') || '[]');
 // Migrate old players that may lack jersey field
 players = players.map(p => ({ jersey: '', ...p }));
 
+function setUnit(unit) {
+  document.getElementById('newPlayerUnit').value = unit;
+  const offBtn = document.getElementById('unitOffenseBtn');
+  const defBtn = document.getElementById('unitDefenseBtn');
+  if (unit === 'offense') {
+    offBtn.style.background = '#07472a'; offBtn.style.color = '#ffd000'; offBtn.style.borderColor = '#07472a';
+    defBtn.style.background = 'white';   defBtn.style.color = '#555';    defBtn.style.borderColor = '#ddd';
+  } else {
+    defBtn.style.background = '#07472a'; defBtn.style.color = '#ffd000'; defBtn.style.borderColor = '#07472a';
+    offBtn.style.background = 'white';   offBtn.style.color = '#555';    offBtn.style.borderColor = '#ddd';
+  }
+}
+
 function savePlayers() {
   localStorage.setItem('players', JSON.stringify(players));
 }
@@ -527,7 +551,7 @@ function renderPlayerList() {
       <span>
         <span class="jersey-num">${p.jersey !== '' && p.jersey !== undefined ? '#' + p.jersey : '—'}</span>
         ${p.name}
-        <span class="unit-badge">${p.unit}</span>
+        
       </span>
       <button class="remove-btn" onclick="removePlayer(${p.id})">Remove</button>
     </div>
@@ -549,6 +573,7 @@ function addPlayer() {
 
   document.getElementById('newPlayerName').value = '';
   document.getElementById('newPlayerJersey').value = '';
+  setUnit('offense');
   savePlayers();
   renderPlayerList();
   renderAll();
