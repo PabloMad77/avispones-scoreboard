@@ -178,7 +178,9 @@ table {
   overflow: hidden;
   box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
-th, td { padding: 10px 14px; border-bottom: 1px solid #e0e0e0; }
+th, td { padding: 8px 6px; border-bottom: 1px solid #e0e0e0; font-size: 14px; }
+th:first-child, td:first-child { padding-left: 10px; }
+th:nth-child(2), td:nth-child(2) { text-align: left; padding-left: 8px; }
 th { background: var(--green-dark); color: white; font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #f5fdf7; }
@@ -692,7 +694,7 @@ function renderAll() {
     `<tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>` + offenseRows;
 
   document.getElementById('defenseTable').innerHTML =
-    `<tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>TD</th></tr>` + defenseRows;
+    `<tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>SFT</th><th>TD</th></tr>` + defenseRows;
 }
 
 renderAll();
