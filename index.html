@@ -12,7 +12,6 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#07472a">
 
-<!-- Home screen icon (replace with your actual logo URL once on GitHub Pages) -->
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG">
 <link rel="icon" href="https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG">
 
@@ -53,10 +52,7 @@ h1 {
   text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
-h2 {
-  font-family: 'Oswald', sans-serif;
-  letter-spacing: 1px;
-}
+h2 { font-family: 'Oswald', sans-serif; letter-spacing: 1px; }
 
 input, select {
   padding: 10px 14px;
@@ -93,7 +89,6 @@ select option { background: #0b6b3a; color: white; }
   position: relative;
   overflow: hidden;
 }
-
 .team::before {
   content: '';
   position: absolute;
@@ -101,9 +96,7 @@ select option { background: #0b6b3a; color: white; }
   height: 5px;
   background: var(--gold);
 }
-
 .team h2 { margin: 0 0 4px; font-size: 1.3rem; }
-
 .team input {
   background: #f0f7f0;
   color: var(--green-dark);
@@ -126,10 +119,7 @@ select option { background: #0b6b3a; color: white; }
   color: var(--green-dark);
   transition: transform 0.15s;
 }
-
-.score.bump {
-  transform: scale(1.18);
-}
+.score.bump { transform: scale(1.18); }
 
 .score-buttons { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; }
 
@@ -154,6 +144,17 @@ button:active { transform: scale(0.95); opacity: 0.85; }
 .game-controls { margin: 10px 0; }
 .export-btn { background: var(--gold); color: black; font-weight: 700; margin: 6px; }
 .reset-btn  { background: #1a1a1a; color: white; margin: 6px; }
+
+/* Auto-save indicator */
+#saveIndicator {
+  font-size: 13px;
+  color: rgba(255,255,255,0.45);
+  margin-top: 2px;
+  min-height: 20px;
+  transition: opacity 0.4s;
+  letter-spacing: 0.3px;
+}
+#saveIndicator.saved { color: #6effa0; }
 
 hr { border: none; border-top: 1px solid rgba(255,255,255,0.2); margin: 40px 0; }
 
@@ -185,7 +186,6 @@ th { background: var(--green-dark); color: white; font-family: 'Oswald', sans-se
 tr:last-child td { border-bottom: none; }
 tr:hover td { background: #f5fdf7; }
 
-/* Jersey number badge in table */
 .jersey-badge {
   display: inline-block;
   background: var(--green-dark);
@@ -230,7 +230,6 @@ tr:hover td { background: #f5fdf7; }
   color: var(--green-dark);
   font-size: 1.4rem;
 }
-
 .modal-close {
   position: absolute;
   top: 14px; right: 14px;
@@ -256,14 +255,6 @@ tr:hover td { background: #f5fdf7; }
   border-bottom: 1px solid #eee;
 }
 .player-list-item span { font-weight: 500; }
-.player-list-item .unit-badge {
-  font-size: 11px;
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 2px 8px;
-  border-radius: 20px;
-  margin-left: 8px;
-}
 .player-list-item .jersey-num {
   font-family: 'Oswald', sans-serif;
   font-weight: 700;
@@ -293,7 +284,6 @@ tr:hover td { background: #f5fdf7; }
 
 .subtitle { opacity: 0.7; font-size: 14px; margin: 0 0 16px; }
 
-/* Jersey number in stat modal */
 .stat-jersey {
   font-family: 'Oswald', sans-serif;
   font-weight: 700;
@@ -317,7 +307,7 @@ tr:hover td { background: #f5fdf7; }
   <h1>Avispones</h1>
 
   <div>
-    <input id="categoryName" placeholder="Category / League">
+    <input id="categoryName" placeholder="Category / League" oninput="saveGameState()">
   </div>
 
   <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:6px;">
@@ -333,7 +323,7 @@ tr:hover td { background: #f5fdf7; }
       <option>Final</option>
       <option value="custom">Custom...</option>
     </select>
-    <input id="customJornada" placeholder="Custom match name" style="display:none; max-width:180px;">
+    <input id="customJornada" placeholder="Custom match name" style="display:none; max-width:180px;" oninput="saveGameState()">
   </div>
 
   <div class="score-container">
@@ -349,7 +339,7 @@ tr:hover td { background: #f5fdf7; }
     </div>
 
     <div class="team">
-      <input id="opponentName" placeholder="Opponent Name">
+      <input id="opponentName" placeholder="Opponent Name" oninput="saveGameState()">
       <div class="score" id="opponentScore">0</div>
       <div class="score-buttons">
         <button class="add1" onclick="updateScore('opponent',1)">+1</button>
@@ -359,6 +349,8 @@ tr:hover td { background: #f5fdf7; }
     </div>
 
   </div>
+
+  <div id="saveIndicator"></div>
 
 </div>
 
@@ -378,7 +370,6 @@ tr:hover td { background: #f5fdf7; }
   </button>
 
   <div style="position:relative; margin: 32px 0 16px;">
-    <div style="position:absolute; left:50%; transform:translateX(-50%); top:50%; width:80%; height:2px; background:linear-gradient(90deg, transparent, rgba(255,208,0,0.4), transparent;"></div>
     <h3 style="font-family:'Oswald',sans-serif; font-size:2rem; font-weight:700; letter-spacing:6px; text-transform:uppercase; color:var(--gold); margin:0; text-shadow:0 0 20px rgba(255,208,0,0.4);">
       — &nbsp; OFFENSE &nbsp; —
     </h3>
@@ -445,9 +436,7 @@ tr:hover td { background: #f5fdf7; }
   <div class="modal-box">
     <button class="modal-close" onclick="closeModal('playerModal')">✕</button>
     <h3>Manage Players</h3>
-
     <div id="playerList" style="margin-bottom:16px; text-align:left;"></div>
-
     <div style="background:#f5f5f5; border-radius:10px; padding:16px;">
       <strong style="display:block; margin-bottom:8px; color:#333;">Add New Player</strong>
       <div style="display:flex; gap:4px; font-size:11px; color:#888; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; padding:0 2px;">
@@ -479,11 +468,63 @@ tr:hover td { background: #f5fdf7; }
 
 <script>
 
+// ─── Auto-save: Game State ────────────────────────────────────────────────────
+
 let avisponesScore = 0;
 let opponentScore  = 0;
 
+function saveGameState() {
+  const state = {
+    avisponesScore,
+    opponentScore,
+    opponentName:  document.getElementById('opponentName').value,
+    categoryName:  document.getElementById('categoryName').value,
+    jornada:       document.getElementById('jornadaSelect').value,
+    customJornada: document.getElementById('customJornada').value,
+  };
+  localStorage.setItem('gameState', JSON.stringify(state));
+  flashSaved();
+}
+
+function loadGameState() {
+  try {
+    const raw = localStorage.getItem('gameState');
+    if (!raw) return;
+    const s = JSON.parse(raw);
+
+    avisponesScore = s.avisponesScore || 0;
+    opponentScore  = s.opponentScore  || 0;
+
+    document.getElementById('avisponesScore').innerText = avisponesScore;
+    document.getElementById('opponentScore').innerText  = opponentScore;
+
+    if (s.opponentName)  document.getElementById('opponentName').value  = s.opponentName;
+    if (s.categoryName)  document.getElementById('categoryName').value  = s.categoryName;
+    if (s.jornada) {
+      document.getElementById('jornadaSelect').value = s.jornada;
+      if (s.jornada === 'custom') {
+        document.getElementById('customJornada').style.display = 'inline-block';
+        document.getElementById('customJornada').value = s.customJornada || '';
+      }
+    }
+  } catch(e) {}
+}
+
+let saveTimer = null;
+function flashSaved() {
+  const el = document.getElementById('saveIndicator');
+  el.textContent = '✓ Guardado automáticamente';
+  el.classList.add('saved');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    el.textContent = '';
+    el.classList.remove('saved');
+  }, 2000);
+}
+
+// ─── Score ────────────────────────────────────────────────────────────────────
+
 function updateScore(team, val) {
-  const key = team === 'avispones' ? 'avisponesScore' : 'opponentScore';
   if (team === 'avispones') {
     avisponesScore = Math.max(0, avisponesScore + val);
     document.getElementById('avisponesScore').innerText = avisponesScore;
@@ -491,32 +532,40 @@ function updateScore(team, val) {
     opponentScore = Math.max(0, opponentScore + val);
     document.getElementById('opponentScore').innerText = opponentScore;
   }
-
-  // Bump animation
+  const key = team === 'avispones' ? 'avisponesScore' : 'opponentScore';
   const el = document.getElementById(key);
   el.classList.remove('bump');
   void el.offsetWidth;
   el.classList.add('bump');
   setTimeout(() => el.classList.remove('bump'), 200);
+  saveGameState();
 }
 
 function resetGame() {
-  if (confirm('Reset game? All scores will be cleared.')) {
-    location.reload();
-  }
+  if (!confirm('Reset game? Scores and match info will be cleared.')) return;
+  avisponesScore = 0;
+  opponentScore  = 0;
+  document.getElementById('avisponesScore').innerText = 0;
+  document.getElementById('opponentScore').innerText  = 0;
+  document.getElementById('opponentName').value  = '';
+  document.getElementById('categoryName').value  = '';
+  document.getElementById('jornadaSelect').value = '';
+  document.getElementById('customJornada').value = '';
+  document.getElementById('customJornada').style.display = 'none';
+  localStorage.removeItem('gameState');
+  flashSaved();
 }
 
 function handleJornadaChange() {
   const select = document.getElementById('jornadaSelect');
   const custom = document.getElementById('customJornada');
   custom.style.display = select.value === 'custom' ? 'inline-block' : 'none';
+  saveGameState();
 }
 
-// ─── Players ───────────────────────────────────────────────────────────────
+// ─── Players ──────────────────────────────────────────────────────────────────
 
 let players = JSON.parse(localStorage.getItem('players') || '[]');
-
-// Migrate old players that may lack jersey field
 players = players.map(p => ({ jersey: '', ...p }));
 
 function setUnit(unit) {
@@ -532,39 +581,26 @@ function setUnit(unit) {
   }
 }
 
-function savePlayers() {
-  localStorage.setItem('players', JSON.stringify(players));
-}
+function savePlayers() { localStorage.setItem('players', JSON.stringify(players)); }
 
-// Sort players by jersey number (numeric). Players with no number go to end.
 function sortedByJersey(arr) {
   return [...arr].sort((a, b) => {
-    const na = a.jersey !== '' && a.jersey !== null && a.jersey !== undefined ? Number(a.jersey) : Infinity;
-    const nb = b.jersey !== '' && b.jersey !== null && b.jersey !== undefined ? Number(b.jersey) : Infinity;
+    const na = a.jersey !== '' && a.jersey != null ? Number(a.jersey) : Infinity;
+    const nb = b.jersey !== '' && b.jersey != null ? Number(b.jersey) : Infinity;
     return na - nb;
   });
 }
 
-function openPlayerManager() {
-  renderPlayerList();
-  openModal('playerModal');
-}
+function openPlayerManager() { renderPlayerList(); openModal('playerModal'); }
 
 function renderPlayerList() {
   const container = document.getElementById('playerList');
-  if (!players.length) {
-    container.innerHTML = '<p style="color:#999; text-align:center;">No players yet.</p>';
-    return;
-  }
-
-  const sorted = sortedByJersey(players);
-
-  container.innerHTML = sorted.map(p => `
+  if (!players.length) { container.innerHTML = '<p style="color:#999; text-align:center;">No players yet.</p>'; return; }
+  container.innerHTML = sortedByJersey(players).map(p => `
     <div class="player-list-item">
       <span>
         <span class="jersey-num">${p.jersey !== '' && p.jersey !== undefined ? '#' + p.jersey : '—'}</span>
         ${p.name}
-        
       </span>
       <button class="remove-btn" onclick="removePlayer(${p.id})">Remove</button>
     </div>
@@ -572,567 +608,303 @@ function renderPlayerList() {
 }
 
 function addPlayer() {
-  const name    = document.getElementById('newPlayerName').value.trim();
-  const unit    = document.getElementById('newPlayerUnit').value;
-  const jerseyRaw = document.getElementById('newPlayerJersey').value.trim();
-  const jersey  = jerseyRaw !== '' ? jerseyRaw : '';
-
+  const name   = document.getElementById('newPlayerName').value.trim();
+  const unit   = document.getElementById('newPlayerUnit').value;
+  const jersey = document.getElementById('newPlayerJersey').value.trim();
   if (!name) return;
-
   players.push({ id: Date.now(), name, unit, jersey,
-    td: 0, catch: 0, xp: 0,
-    int: 0, flag: 0, sack: 0, safety: 0, defTd: 0
-  });
-
-  document.getElementById('newPlayerName').value = '';
+    td:0, catch:0, xp:0, int:0, flag:0, sack:0, safety:0, defTd:0 });
+  document.getElementById('newPlayerName').value   = '';
   document.getElementById('newPlayerJersey').value = '';
   setUnit('offense');
-  savePlayers();
-  renderPlayerList();
-  renderAll();
+  savePlayers(); renderPlayerList(); renderAll();
 }
 
 function removePlayer(id) {
   if (!confirm('Remove this player?')) return;
   players = players.filter(p => p.id !== id);
-  savePlayers();
-  renderPlayerList();
-  renderAll();
+  savePlayers(); renderPlayerList(); renderAll();
 }
 
-// ─── Stats ──────────────────────────────────────────────────────────────────
+// ─── Stats ────────────────────────────────────────────────────────────────────
 
-let currentStat = '';
-let currentUnit = '';
-
+let currentStat = '', currentUnit = '';
 const statLabels = { td:'TD', catch:'CATCH', xp:'XP', int:'INT', flag:'FLAG', sack:'SACK', safety:'SAFETY', defTd:'TD (DEF)' };
 
 function openStat(stat, unit) {
-  currentStat = stat;
-  currentUnit = unit;
-
+  currentStat = stat; currentUnit = unit;
   document.getElementById('statModalTitle').textContent =
     `${statLabels[stat] || stat} — ${unit.charAt(0).toUpperCase() + unit.slice(1)}`;
-
   const pool = sortedByJersey(players.filter(p => p.unit === unit));
-  if (!pool.length) {
-    document.getElementById('statPlayers').innerHTML =
-      '<p style="color:#999;">No players in this unit. Add some first.</p>';
-  } else {
-    document.getElementById('statPlayers').innerHTML = pool.map(p => `
-      <div style="display:flex; align-items:center; justify-content:space-between; width:100%; background:#f5fdf7; border-radius:10px; padding:10px 14px; margin-bottom:8px;">
-        <span style="font-weight:600; font-size:16px; color:#14532d; flex:1; text-align:left; display:flex; align-items:center; gap:6px;">
+  document.getElementById('statPlayers').innerHTML = !pool.length
+    ? '<p style="color:#999;">No players in this unit. Add some first.</p>'
+    : pool.map(p => `
+      <div style="display:flex;align-items:center;justify-content:space-between;width:100%;background:#f5fdf7;border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+        <span style="font-weight:600;font-size:16px;color:#14532d;flex:1;text-align:left;display:flex;align-items:center;gap:6px;">
           ${p.jersey !== '' && p.jersey !== undefined ? `<span class="stat-jersey">#${p.jersey}</span>` : ''}
           ${p.name}
         </span>
-        <span id="statVal-${p.id}" style="font-family:'Oswald',sans-serif; font-size:22px; font-weight:700; color:#07472a; min-width:32px; text-align:center;">${p[stat] || 0}</span>
-        <div style="display:flex; gap:6px; margin-left:12px;">
-          <button onclick="removeStat(${p.id})" style="background:#fee2e2; color:#dc2626; font-size:20px; font-weight:700; padding:6px 14px; border-radius:8px; margin:0;">−</button>
-          <button onclick="addStat(${p.id})" style="background:#14532d; color:white; font-size:20px; font-weight:700; padding:6px 14px; border-radius:8px; margin:0;">+</button>
+        <span id="statVal-${p.id}" style="font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:#07472a;min-width:32px;text-align:center;">${p[stat] || 0}</span>
+        <div style="display:flex;gap:6px;margin-left:12px;">
+          <button onclick="removeStat(${p.id})" style="background:#fee2e2;color:#dc2626;font-size:20px;font-weight:700;padding:6px 14px;border-radius:8px;margin:0;">−</button>
+          <button onclick="addStat(${p.id})" style="background:#14532d;color:white;font-size:20px;font-weight:700;padding:6px 14px;border-radius:8px;margin:0;">+</button>
         </div>
-      </div>
-    `).join('');
-  }
-
+      </div>`).join('');
   openModal('statModal');
 }
 
 function addStat(id) {
-  const p = players.find(x => x.id === id);
-  if (!p) return;
+  const p = players.find(x => x.id === id); if (!p) return;
   p[currentStat] = (p[currentStat] || 0) + 1;
-  savePlayers();
-  renderAll();
-  const el = document.getElementById(`statVal-${id}`);
-  if (el) el.textContent = p[currentStat];
+  savePlayers(); renderAll();
+  const el = document.getElementById(`statVal-${id}`); if (el) el.textContent = p[currentStat];
 }
 
 function removeStat(id) {
-  const p = players.find(x => x.id === id);
-  if (!p) return;
+  const p = players.find(x => x.id === id); if (!p) return;
   p[currentStat] = Math.max(0, (p[currentStat] || 0) - 1);
-  savePlayers();
-  renderAll();
-  const el = document.getElementById(`statVal-${id}`);
-  if (el) el.textContent = p[currentStat];
+  savePlayers(); renderAll();
+  const el = document.getElementById(`statVal-${id}`); if (el) el.textContent = p[currentStat];
 }
 
 function renderAll() {
-  let offenseRows = '';
-  let defenseRows = '';
-
-  const sortedPlayers = sortedByJersey(players);
-
-  sortedPlayers.forEach(p => {
-    const jerseyCell = p.jersey !== '' && p.jersey !== undefined
-      ? `<td style="font-family:'Oswald',sans-serif; font-weight:700; color:var(--green-dark);">#${p.jersey}</td>`
+  let off = '', def = '';
+  sortedByJersey(players).forEach(p => {
+    const jc = p.jersey !== '' && p.jersey !== undefined
+      ? `<td style="font-family:'Oswald',sans-serif;font-weight:700;color:var(--green-dark);">#${p.jersey}</td>`
       : `<td style="color:#aaa;">—</td>`;
-
-    if (p.unit === 'offense') {
-      offenseRows += `<tr>
-        ${jerseyCell}
-        <td>${p.name}</td>
-        <td>${p.td}</td>
-        <td>${p.catch}</td>
-        <td>${p.xp}</td>
-      </tr>`;
-    }
-    if (p.unit === 'defense') {
-      defenseRows += `<tr>
-        ${jerseyCell}
-        <td>${p.name}</td>
-        <td>${p.int}</td>
-        <td>${p.flag}</td>
-        <td>${p.sack}</td>
-        <td>${p.safety || 0}</td>
-        <td>${p.defTd}</td>
-      </tr>`;
-    }
+    if (p.unit === 'offense')
+      off += `<tr>${jc}<td>${p.name}</td><td>${p.td}</td><td>${p.catch}</td><td>${p.xp}</td></tr>`;
+    if (p.unit === 'defense')
+      def += `<tr>${jc}<td>${p.name}</td><td>${p.int}</td><td>${p.flag}</td><td>${p.sack}</td><td>${p.safety||0}</td><td>${p.defTd}</td></tr>`;
   });
-
   document.getElementById('offenseTable').innerHTML =
-    `<tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>` + offenseRows;
-
+    `<tr><th>#</th><th>Player</th><th>TD</th><th>CATCH</th><th>XP</th></tr>` + off;
   document.getElementById('defenseTable').innerHTML =
-    `<tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>SFT</th><th>TD</th></tr>` + defenseRows;
+    `<tr><th>#</th><th>Player</th><th>INT</th><th>FLAG</th><th>SACK</th><th>SFT</th><th>TD</th></tr>` + def;
 }
 
-renderAll();
-
-// ─── Modals ─────────────────────────────────────────────────────────────────
+// ─── Modals ───────────────────────────────────────────────────────────────────
 
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
 window.addEventListener('click', e => {
   ['statModal','playerModal','previewModal'].forEach(id => {
-    const m = document.getElementById(id);
-    if (e.target === m) closeModal(id);
+    if (e.target === document.getElementById(id)) closeModal(id);
   });
 });
 
-// ─── Export ──────────────────────────────────────────────────────────────────
+// ─── Export ───────────────────────────────────────────────────────────────────
 
-// Instagram 4:5 = 1080 x 1350 px
-const IG_W = 1080;
-const IG_H = 1350;
-
-const C = {
-  green:     '#0b6b3a',
-  greenDark: '#07472a',
-  greenMid:  '#0d8048',
-  gold:      '#ffd000',
-  white:     '#ffffff',
-  offwhite:  '#f0f0f0',
-  black:     '#0a0a0a',
-};
+const IG_W = 1080, IG_H = 1350;
+const C = { green:'#0b6b3a', greenDark:'#07472a', gold:'#ffd000', white:'#ffffff', offwhite:'#f0f0f0', black:'#0a0a0a' };
 
 function roundRect(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.lineTo(x + w - r, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-  ctx.lineTo(x + w, y + h - r);
-  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  ctx.lineTo(x + r, y + h);
-  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-  ctx.lineTo(x, y + r);
-  ctx.quadraticCurveTo(x, y, x + r, y);
-  ctx.closePath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
 }
 
 function drawScoreCard(logo) {
   const canvas = document.createElement('canvas');
-  canvas.width  = IG_W;
-  canvas.height = IG_H;
+  canvas.width = IG_W; canvas.height = IG_H;
   const ctx = canvas.getContext('2d');
 
-  // ── Background ──────────────────────────────────────────────────────
-  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
-  bg.addColorStop(0,   '#04200f');
-  bg.addColorStop(0.5, C.greenDark);
-  bg.addColorStop(1,   '#0d5c30');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, IG_W, IG_H);
+  const bg = ctx.createLinearGradient(0,0,IG_W,IG_H);
+  bg.addColorStop(0,'#04200f'); bg.addColorStop(0.5,C.greenDark); bg.addColorStop(1,'#0d5c30');
+  ctx.fillStyle = bg; ctx.fillRect(0,0,IG_W,IG_H);
 
-  // diagonal accent stripe
-  ctx.save();
-  ctx.globalAlpha = 0.06;
-  ctx.fillStyle = C.white;
-  ctx.beginPath();
-  ctx.moveTo(0, IG_H * 0.55);
-  ctx.lineTo(IG_W, IG_H * 0.3);
-  ctx.lineTo(IG_W, IG_H * 0.6);
-  ctx.lineTo(0, IG_H * 0.85);
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
+  ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle=C.white;
+  ctx.beginPath(); ctx.moveTo(0,IG_H*0.55); ctx.lineTo(IG_W,IG_H*0.3);
+  ctx.lineTo(IG_W,IG_H*0.6); ctx.lineTo(0,IG_H*0.85); ctx.closePath(); ctx.fill(); ctx.restore();
 
-  // ── Gold top bar ────────────────────────────────────────────────────
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, 0, IG_W, 18);
+  ctx.fillStyle = C.gold; ctx.fillRect(0,0,IG_W,18);
 
-  // ── Logo / title ─────────────────────────────────────────────────────
-  if (logo) {
-    drawLogo(ctx, logo, IG_W / 2, 190, 280);
-  } else {
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 110px Oswald, Arial Narrow, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('AVISPONES', IG_W / 2, 155);
-  }
+  if (logo) { drawLogo(ctx, logo, IG_W/2, 190, 280); }
+  else { ctx.fillStyle=C.gold; ctx.font='bold 110px Oswald,Arial'; ctx.textAlign='center'; ctx.fillText('AVISPONES',IG_W/2,155); }
 
-  // ── VS divider ──────────────────────────────────────────────────────
-  const cardY = 370, cardH = 420, cardPad = 60;
-  const halfW  = IG_W / 2 - cardPad;
-  const card1X = cardPad;
-  const card2X = IG_W / 2 + 20;
-  const cardW  = halfW - 20;
+  const cardY=370, cardH=420, cardPad=60;
+  const halfW=IG_W/2-cardPad, card1X=cardPad, card2X=IG_W/2+20, cardW=halfW-20;
 
-  // Avispones card
-  roundRect(ctx, card1X, cardY, cardW, cardH, 28);
-  ctx.fillStyle = 'rgba(255,255,255,0.07)';
-  ctx.fill();
-  roundRect(ctx, card1X, cardY, cardW, cardH, 28);
-  ctx.strokeStyle = C.gold;
-  ctx.lineWidth = 4;
-  ctx.stroke();
+  roundRect(ctx,card1X,cardY,cardW,cardH,28); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill();
+  roundRect(ctx,card1X,cardY,cardW,cardH,28); ctx.strokeStyle=C.gold; ctx.lineWidth=4; ctx.stroke();
 
-  // Opponent card
-  roundRect(ctx, card2X, cardY, cardW, cardH, 28);
-  ctx.fillStyle = 'rgba(255,255,255,0.07)';
-  ctx.fill();
-  roundRect(ctx, card2X, cardY, cardW, cardH, 28);
-  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-  ctx.lineWidth = 4;
-  ctx.stroke();
+  roundRect(ctx,card2X,cardY,cardW,cardH,28); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill();
+  roundRect(ctx,card2X,cardY,cardW,cardH,28); ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=4; ctx.stroke();
 
-  // Team labels
-  ctx.fillStyle = C.gold;
-  ctx.font = 'bold 44px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('AVISPONES', card1X + cardW / 2, cardY + 72);
+  ctx.fillStyle=C.gold; ctx.font='bold 44px Oswald,Arial'; ctx.textAlign='center';
+  ctx.fillText('AVISPONES', card1X+cardW/2, cardY+72);
 
   const opponent = document.getElementById('opponentName').value.trim() || 'RIVAL';
-  ctx.fillStyle = C.offwhite;
-  ctx.font = 'bold 44px Oswald, Arial';
-  ctx.fillText(opponent.toUpperCase(), card2X + cardW / 2, cardY + 72);
+  ctx.fillStyle=C.offwhite; ctx.fillText(opponent.toUpperCase(), card2X+cardW/2, cardY+72);
 
-  // Scores
-  ctx.font = 'bold 220px Oswald, Arial';
-  ctx.fillStyle = C.white;
-  ctx.fillText(String(avisponesScore), card1X + cardW / 2, cardY + 320);
+  ctx.font='bold 220px Oswald,Arial'; ctx.fillStyle=C.white;
+  ctx.fillText(String(avisponesScore), card1X+cardW/2, cardY+320);
+  ctx.fillStyle='rgba(255,255,255,0.75)';
+  ctx.fillText(String(opponentScore), card2X+cardW/2, cardY+320);
 
-  ctx.fillStyle = 'rgba(255,255,255,0.75)';
-  ctx.fillText(String(opponentScore),  card2X + cardW / 2, cardY + 320);
+  const vsX=IG_W/2, vsY=cardY+cardH/2+10;
+  ctx.fillStyle=C.gold; roundRect(ctx,vsX-42,vsY-46,84,70,35); ctx.fill();
+  ctx.fillStyle=C.black; ctx.font='bold 42px Oswald,Arial'; ctx.textAlign='center'; ctx.fillText('VS',vsX,vsY+14);
 
-  // ── VS pill in the middle ────────────────────────────────────────────
-  const vsX = IG_W / 2, vsY = cardY + cardH / 2 + 10;
-  ctx.fillStyle = C.gold;
-  roundRect(ctx, vsX - 42, vsY - 46, 84, 70, 35);
-  ctx.fill();
-  ctx.fillStyle = C.black;
-  ctx.font = 'bold 42px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('VS', vsX, vsY + 14);
+  ctx.strokeStyle=C.gold; ctx.lineWidth=3; ctx.globalAlpha=0.4;
+  ctx.beginPath(); ctx.moveTo(80,cardY+cardH+54); ctx.lineTo(IG_W-80,cardY+cardH+54); ctx.stroke();
+  ctx.globalAlpha=1;
 
-  // ── Gold separator line ──────────────────────────────────────────────
-  const sepY = cardY + cardH + 54;
-  ctx.strokeStyle = C.gold;
-  ctx.lineWidth = 3;
-  ctx.globalAlpha = 0.4;
-  ctx.beginPath();
-  ctx.moveTo(80, sepY);
-  ctx.lineTo(IG_W - 80, sepY);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  drawFooter(ctx);
-
-  return canvas;
+  drawFooter(ctx); return canvas;
 }
 
 function drawStatsCard(logo) {
   const canvas = document.createElement('canvas');
-  canvas.width  = IG_W;
-  canvas.height = IG_H;
+  canvas.width = IG_W; canvas.height = IG_H;
   const ctx = canvas.getContext('2d');
 
-  // Background
-  const bg = ctx.createLinearGradient(0, 0, IG_W, IG_H);
-  bg.addColorStop(0, '#04200f');
-  bg.addColorStop(1, '#0d5c30');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, IG_W, IG_H);
+  const bg = ctx.createLinearGradient(0,0,IG_W,IG_H);
+  bg.addColorStop(0,'#04200f'); bg.addColorStop(1,'#0d5c30');
+  ctx.fillStyle=bg; ctx.fillRect(0,0,IG_W,IG_H);
+  ctx.fillStyle=C.gold; ctx.fillRect(0,0,IG_W,18);
 
-  // Gold top bar
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, 0, IG_W, 18);
-
-  // ── Logo + Title inline at top ────────────────────────────────────────
-  const TITLE_Y = 140;
+  const TITLE_Y=140;
   if (logo) {
-    const logoSize = 90;
-    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-    const titleW = ctx.measureText('GAME STATS').width;
-    const groupW = logoSize + 20 + titleW;
-    const groupX = (IG_W - groupW) / 2;
-    ctx.save();
-    ctx.shadowColor = C.gold;
-    ctx.shadowBlur = 35;
-    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
-    ctx.shadowBlur = 70;
-    ctx.globalAlpha = 0.35;
-    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
-    ctx.restore();
-    ctx.drawImage(logo, groupX, TITLE_Y - logoSize + 10, logoSize, logoSize);
-    ctx.fillStyle = C.gold;
-    ctx.textAlign = 'left';
-    ctx.fillText('GAME STATS', groupX + logoSize + 20, TITLE_Y);
+    const logoSize=90;
+    ctx.font='bold 90px Oswald,Arial';
+    const titleW=ctx.measureText('GAME STATS').width;
+    const groupW=logoSize+20+titleW, groupX=(IG_W-groupW)/2;
+    ctx.save(); ctx.shadowColor=C.gold; ctx.shadowBlur=35;
+    ctx.drawImage(logo,groupX,TITLE_Y-logoSize+10,logoSize,logoSize);
+    ctx.shadowBlur=70; ctx.globalAlpha=0.35;
+    ctx.drawImage(logo,groupX,TITLE_Y-logoSize+10,logoSize,logoSize); ctx.restore();
+    ctx.drawImage(logo,groupX,TITLE_Y-logoSize+10,logoSize,logoSize);
+    ctx.fillStyle=C.gold; ctx.textAlign='left';
+    ctx.fillText('GAME STATS',groupX+logoSize+20,TITLE_Y);
   } else {
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 90px Oswald, Arial Narrow, Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('GAME STATS', IG_W / 2, TITLE_Y);
+    ctx.fillStyle=C.gold; ctx.font='bold 90px Oswald,Arial'; ctx.textAlign='center';
+    ctx.fillText('GAME STATS',IG_W/2,TITLE_Y);
   }
 
-  // ── Table helper ──────────────────────────────────────────────────────
   function drawTable(title, cols, rows, startY) {
-    const PAD = 50;
-    const tableW = IG_W - PAD * 2;
-    const colW = tableW / cols.length;
-    const ROW_H = 68;
-    const HEAD_H = 58;
-
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 46px Oswald, Arial';
-    ctx.textAlign = 'left';
-    ctx.fillText(title, PAD, startY - 10);
-
-    ctx.fillStyle = C.gold;
-    ctx.fillRect(PAD, startY, 80, 5);
-
-    const tableY = startY + 20;
-
-    // Header row
-    roundRect(ctx, PAD, tableY, tableW, HEAD_H, 14);
-    ctx.fillStyle = C.greenDark;
-    ctx.fill();
-
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 32px Oswald, Arial';
-    ctx.textAlign = 'center';
-    cols.forEach((col, i) => {
-      ctx.fillText(col.toUpperCase(), PAD + colW * i + colW / 2, tableY + 38);
-    });
-
-    // Data rows
-    rows.forEach((row, ri) => {
-      const ry = tableY + HEAD_H + ri * ROW_H;
-      roundRect(ctx, PAD, ry, tableW, ROW_H, 0);
-      ctx.fillStyle = ri % 2 === 0 ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';
-      ctx.fill();
-
-      ctx.font = ri === 0 ? 'bold 30px Oswald, Arial' : '500 30px Oswald, Arial';
-      row.forEach((cell, ci) => {
-        // First column = jersey # (right-aligned), second column = name (left-aligned)
-        if (ci === 0) {
-          // Jersey number pill
-          const pillText = cell !== '—' ? cell : '—';
-          const pillX = PAD + colW * 0 + colW / 2;
-          const pillY = ry + ROW_H * 0.65;
-          // Draw small gold pill
-          if (cell !== '—') {
+    const PAD=50, tableW=IG_W-PAD*2, colW=tableW/cols.length, ROW_H=68, HEAD_H=58;
+    ctx.fillStyle=C.gold; ctx.font='bold 46px Oswald,Arial'; ctx.textAlign='left';
+    ctx.fillText(title,PAD,startY-10);
+    ctx.fillStyle=C.gold; ctx.fillRect(PAD,startY,80,5);
+    const tableY=startY+20;
+    roundRect(ctx,PAD,tableY,tableW,HEAD_H,14); ctx.fillStyle=C.greenDark; ctx.fill();
+    ctx.fillStyle=C.gold; ctx.font='bold 32px Oswald,Arial'; ctx.textAlign='center';
+    cols.forEach((col,i) => ctx.fillText(col.toUpperCase(), PAD+colW*i+colW/2, tableY+38));
+    rows.forEach((row,ri) => {
+      const ry=tableY+HEAD_H+ri*ROW_H;
+      roundRect(ctx,PAD,ry,tableW,ROW_H,0);
+      ctx.fillStyle=ri%2===0?'rgba(255,255,255,0.06)':'rgba(255,255,255,0.02)'; ctx.fill();
+      row.forEach((cell,ci) => {
+        if (ci===0) {
+          const px=PAD+colW/2, py=ry+ROW_H*0.65;
+          if (cell!=='—') {
             ctx.save();
-            const pillW = 64, pillH = 34, pillR = 17;
-            roundRect(ctx, pillX - pillW/2, pillY - pillH + 8, pillW, pillH, pillR);
-            ctx.fillStyle = C.gold;
-            ctx.fill();
-            ctx.fillStyle = C.greenDark;
-            ctx.font = 'bold 26px Oswald, Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText(pillText, pillX, pillY + 4);
-            ctx.restore();
+            roundRect(ctx,px-32,py-26,64,34,17); ctx.fillStyle=C.gold; ctx.fill();
+            ctx.fillStyle=C.greenDark; ctx.font='bold 26px Oswald,Arial'; ctx.textAlign='center';
+            ctx.fillText(cell,px,py+4); ctx.restore();
           } else {
-            ctx.fillStyle = 'rgba(255,255,255,0.3)';
-            ctx.font = '400 26px Oswald, Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('—', pillX, pillY + 4);
+            ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.font='400 26px Oswald,Arial';
+            ctx.textAlign='center'; ctx.fillText('—',px,py+4);
           }
-        } else if (ci === 1) {
-          // Player name - left aligned
-          ctx.fillStyle = C.white;
-          ctx.font = '600 30px Oswald, Arial';
-          ctx.textAlign = 'left';
-          ctx.fillText(String(cell), PAD + colW + 14, ry + ROW_H * 0.65);
+        } else if (ci===1) {
+          ctx.fillStyle=C.white; ctx.font='600 30px Oswald,Arial'; ctx.textAlign='left';
+          ctx.fillText(String(cell),PAD+colW+14,ry+ROW_H*0.65);
         } else {
-          ctx.fillStyle = 'rgba(255,255,255,0.85)';
-          ctx.font = '500 30px Oswald, Arial';
-          ctx.textAlign = 'center';
-          ctx.fillText(String(cell), PAD + colW * ci + colW / 2, ry + ROW_H * 0.65);
+          ctx.fillStyle='rgba(255,255,255,0.85)'; ctx.font='500 30px Oswald,Arial'; ctx.textAlign='center';
+          ctx.fillText(String(cell),PAD+colW*ci+colW/2,ry+ROW_H*0.65);
         }
       });
-
-      // row divider
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(PAD, ry + ROW_H);
-      ctx.lineTo(PAD + tableW, ry + ROW_H);
-      ctx.stroke();
+      ctx.strokeStyle='rgba(255,255,255,0.08)'; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(PAD,ry+ROW_H); ctx.lineTo(PAD+tableW,ry+ROW_H); ctx.stroke();
     });
-
-    const totalH = HEAD_H + rows.length * ROW_H;
-    roundRect(ctx, PAD, tableY, tableW, totalH, 14);
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.lineWidth = 2;
-    ctx.stroke();
-
-    return tableY + totalH;
+    const totalH=HEAD_H+rows.length*ROW_H;
+    roundRect(ctx,PAD,tableY,tableW,totalH,14); ctx.strokeStyle='rgba(255,255,255,0.15)'; ctx.lineWidth=2; ctx.stroke();
+    return tableY+totalH;
   }
 
-  // ── Offense table ────────────────────────────────────────────────────
-  const offPlayers = sortedByJersey(players.filter(p => p.unit === 'offense'));
-  const offWithStats = offPlayers.filter(p => p.td > 0 || p.catch > 0 || p.xp > 0);
-  const offRows = offWithStats.length
-    ? offWithStats.map(p => [
-        p.jersey !== '' && p.jersey !== undefined ? `#${p.jersey}` : '—',
-        p.name, p.td, p.catch, p.xp
-      ])
-    : [['—', '—', '—', '—', '—']];
+  const offP=sortedByJersey(players.filter(p=>p.unit==='offense')).filter(p=>p.td>0||p.catch>0||p.xp>0);
+  const offRows=offP.length ? offP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.td,p.catch,p.xp]) : [['—','—','—','—','—']];
+  let nextY=drawTable('OFFENSE',['#','Player','TD','CATCH','XP'],offRows,215);
 
-  let nextY = drawTable('OFFENSE', ['#','Player','TD','CATCH','XP'], offRows, 215);
+  const defP=sortedByJersey(players.filter(p=>p.unit==='defense')).filter(p=>p.int>0||p.flag>0||p.sack>0||p.defTd>0);
+  const defRows=defP.length ? defP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.int,p.flag,p.sack,p.defTd]) : [['—','—','—','—','—','—','—']];
+  drawTable('DEFENSE',['#','Player','INT','FLAG','SACK','SFT','TD'],defRows,nextY+90);
 
-  // ── Defense table ─────────────────────────────────────────────────────
-  const defPlayers = sortedByJersey(players.filter(p => p.unit === 'defense'));
-  const defWithStats = defPlayers.filter(p => p.int > 0 || p.flag > 0 || p.sack > 0 || p.defTd > 0);
-  const defRows = defWithStats.length
-    ? defWithStats.map(p => [
-        p.jersey !== '' && p.jersey !== undefined ? `#${p.jersey}` : '—',
-        p.name, p.int, p.flag, p.sack, p.defTd
-      ])
-    : [['—', '—', '—', '—', '—', '—', '—']];
-
-  drawTable('DEFENSE', ['#','Player','INT','FLAG','SACK','SFT','TD'], defRows, nextY + 90);
-
-  drawFooter(ctx);
-
-  return canvas;
+  drawFooter(ctx); return canvas;
 }
 
 function showPreview(canvas, filename) {
   const dataUrl = canvas.toDataURL('image/png');
   document.getElementById('previewImg').src = dataUrl;
-
-  const btn  = document.getElementById('previewActionBtn');
-  const hint = document.getElementById('shareHint');
-  hint.style.display = 'none';
-
-  btn.onclick = async () => {
+  document.getElementById('shareHint').style.display = 'none';
+  document.getElementById('previewActionBtn').onclick = async () => {
     if (navigator.share && navigator.canShare) {
       try {
         const blob = await (await fetch(dataUrl)).blob();
-        const file = new File([blob], filename, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'Avispones' });
-          return;
-        }
-      } catch (e) {
-        if (e.name === 'AbortError') return;
-      }
+        const file = new File([blob], filename, { type:'image/png' });
+        if (navigator.canShare({ files:[file] })) { await navigator.share({ files:[file], title:'Avispones' }); return; }
+      } catch(e) { if (e.name==='AbortError') return; }
     }
-    const a = document.createElement('a');
-    a.download = filename;
-    a.href = dataUrl;
-    a.click();
+    const a = document.createElement('a'); a.download=filename; a.href=dataUrl; a.click();
   };
-
   openModal('previewModal');
 }
 
 function getMetaInfo() {
-  const category = document.getElementById('categoryName').value.trim();
+  const category   = document.getElementById('categoryName').value.trim();
   const jornadaSel = document.getElementById('jornadaSelect');
   const customJ    = document.getElementById('customJornada').value.trim();
-  const jornada    = jornadaSel.value === 'custom' ? customJ : jornadaSel.value || '';
+  const jornada    = jornadaSel.value==='custom' ? customJ : jornadaSel.value||'';
   const now        = new Date();
-  const timestamp  = now.toLocaleDateString('es-MX', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
-                   + '  •  '
-                   + now.toLocaleTimeString('es-MX', { hour:'2-digit', minute:'2-digit' });
+  const timestamp  = now.toLocaleDateString('es-MX',{weekday:'long',year:'numeric',month:'long',day:'numeric'})
+                   + '  •  ' + now.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
   return { category, jornada, timestamp };
 }
 
-// ─── Footer — UPDATED: larger font sizes for better readability ───────────
 function drawFooter(ctx) {
   const { category, jornada, timestamp } = getMetaInfo();
-
-  // Gold bottom bar
-  ctx.fillStyle = C.gold;
-  ctx.fillRect(0, IG_H - 18, IG_W, 18);
-
-  // "AVISPONES FLAG FOOTBALL" line — increased from 28px → 42px
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.font = '500 42px Oswald, Arial';
-  ctx.textAlign = 'center';
-  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 120);
-
-  // Category / Jornada line — increased from 30px → 46px
-  const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
-  if (metaLine) {
-    ctx.fillStyle = C.gold;
-    ctx.font = 'bold 46px Oswald, Arial';
-    ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 70);
-  }
-
-  // Timestamp line — increased from 24px → 36px
-  ctx.fillStyle = 'rgba(255,255,255,0.55)';
-  ctx.font = '400 36px Oswald, Arial';
-  ctx.fillText(timestamp, IG_W / 2, IG_H - 28);
+  ctx.fillStyle=C.gold; ctx.fillRect(0,IG_H-18,IG_W,18);
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='500 42px Oswald,Arial'; ctx.textAlign='center';
+  ctx.fillText('AVISPONES FLAG FOOTBALL',IG_W/2,IG_H-120);
+  const metaLine=[category,jornada].filter(Boolean).join('  ·  ');
+  if (metaLine) { ctx.fillStyle=C.gold; ctx.font='bold 46px Oswald,Arial'; ctx.fillText(metaLine.toUpperCase(),IG_W/2,IG_H-70); }
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='400 36px Oswald,Arial'; ctx.fillText(timestamp,IG_W/2,IG_H-28);
 }
 
 const LOGO_URL = 'https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG';
 
 function loadLogo() {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload  = () => resolve(img);
-    img.onerror = () => resolve(null);
-    img.src = LOGO_URL;
+  return new Promise(resolve => {
+    const img = new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>resolve(img); img.onerror=()=>resolve(null); img.src=LOGO_URL;
   });
 }
 
 function drawLogo(ctx, img, x, y, size) {
   if (!img) return;
-  ctx.save();
-  ctx.shadowColor = C.gold;
-  ctx.shadowBlur = 40;
-  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
-  ctx.shadowBlur = 80;
-  ctx.globalAlpha = 0.4;
-  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
-  ctx.restore();
-  ctx.drawImage(img, x - size / 2, y - size / 2, size, size);
+  ctx.save(); ctx.shadowColor=C.gold; ctx.shadowBlur=40;
+  ctx.drawImage(img,x-size/2,y-size/2,size,size);
+  ctx.shadowBlur=80; ctx.globalAlpha=0.4;
+  ctx.drawImage(img,x-size/2,y-size/2,size,size); ctx.restore();
+  ctx.drawImage(img,x-size/2,y-size/2,size,size);
 }
 
 function resetStats() {
   if (!confirm('Reset all player stats? Players will be kept but all stats cleared.')) return;
-  players = players.map(p => ({ ...p, td: 0, catch: 0, xp: 0, int: 0, flag: 0, sack: 0, safety: 0, defTd: 0 }));
-  savePlayers();
-  renderAll();
+  players=players.map(p=>({...p,td:0,catch:0,xp:0,int:0,flag:0,sack:0,safety:0,defTd:0}));
+  savePlayers(); renderAll();
 }
 
-function exportScore() {
-  loadLogo().then(logo => {
-    showPreview(drawScoreCard(logo), 'avispones_score.png');
-  });
-}
+function exportScore() { loadLogo().then(logo=>showPreview(drawScoreCard(logo),'avispones_score.png')); }
+function exportStats()  { loadLogo().then(logo=>showPreview(drawStatsCard(logo),'avispones_stats.png')); }
 
-function exportStats() {
-  loadLogo().then(logo => {
-    showPreview(drawStatsCard(logo), 'avispones_stats.png');
-  });
-}
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadGameState();
+renderAll();
 
 </script>
 </body>
