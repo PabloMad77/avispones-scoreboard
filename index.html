@@ -1062,27 +1062,32 @@ function getMetaInfo() {
   return { category, jornada, timestamp };
 }
 
+// ─── Footer — UPDATED: larger font sizes for better readability ───────────
 function drawFooter(ctx) {
   const { category, jornada, timestamp } = getMetaInfo();
 
+  // Gold bottom bar
   ctx.fillStyle = C.gold;
   ctx.fillRect(0, IG_H - 18, IG_W, 18);
 
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.font = '500 28px Oswald, Arial';
+  // "AVISPONES FLAG FOOTBALL" line — increased from 28px → 42px
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '500 42px Oswald, Arial';
   ctx.textAlign = 'center';
-  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 110);
+  ctx.fillText('AVISPONES FLAG FOOTBALL', IG_W / 2, IG_H - 120);
 
+  // Category / Jornada line — increased from 30px → 46px
   const metaLine = [category, jornada].filter(Boolean).join('  ·  ');
   if (metaLine) {
     ctx.fillStyle = C.gold;
-    ctx.font = 'bold 30px Oswald, Arial';
-    ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 72);
+    ctx.font = 'bold 46px Oswald, Arial';
+    ctx.fillText(metaLine.toUpperCase(), IG_W / 2, IG_H - 70);
   }
 
-  ctx.fillStyle = 'rgba(255,255,255,0.4)';
-  ctx.font = '400 24px Oswald, Arial';
-  ctx.fillText(timestamp, IG_W / 2, IG_H - 36);
+  // Timestamp line — increased from 24px → 36px
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.font = '400 36px Oswald, Arial';
+  ctx.fillText(timestamp, IG_W / 2, IG_H - 28);
 }
 
 const LOGO_URL = 'https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG';
