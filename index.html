@@ -596,15 +596,46 @@ function openPlayerManager() { renderPlayerList(); openModal('playerModal'); }
 function renderPlayerList() {
   const container = document.getElementById('playerList');
   if (!players.length) { container.innerHTML = '<p style="color:#999; text-align:center;">No players yet.</p>'; return; }
-  container.innerHTML = sortedByJersey(players).map(p => `
-    <div class="player-list-item">
-      <span>
-        <span class="jersey-num">${p.jersey !== '' && p.jersey !== undefined ? '#' + p.jersey : '—'}</span>
-        ${p.name}
-      </span>
-      <button class="remove-btn" onclick="removePlayer(${p.id})">Remove</button>
-    </div>
-  `).join('');
+
+  const sorted = sortedByJersey(players);
+
+  // Group by unit with section headers
+  const offPlayers = sorted.filter(p => p.unit === 'offense');
+  const defPlayers = sorted.filter(p => p.unit === 'defense');
+
+  function playerRow(p) {
+    const isOff = p.unit === 'offense';
+    const bgColor    = isOff ? '#fffbe6' : '#e8f5e9';
+    const badgeBg    = isOff ? '#b8860b' : '#07472a';
+    const badgeColor = isOff ? '#fff8dc' : '#ffd000';
+    const nameColor  = isOff ? '#7a5c00' : '#14532d';
+    return `
+      <div class="player-list-item" style="background:${bgColor}; border-radius:8px; margin-bottom:4px; padding:8px 10px;">
+        <span style="display:flex; align-items:center; gap:0;">
+          <span style="
+            font-family:'Oswald',sans-serif; font-weight:700; font-size:13px;
+            background:${badgeBg}; color:${badgeColor};
+            padding:2px 8px; border-radius:20px; margin-right:8px;
+            min-width:36px; text-align:center; display:inline-block;">
+            ${p.jersey !== '' && p.jersey !== undefined ? '#' + p.jersey : '—'}
+          </span>
+          <span style="font-weight:600; color:${nameColor};">${p.name}</span>
+        </span>
+        <button class="remove-btn" onclick="removePlayer(${p.id})">Remove</button>
+      </div>`;
+  }
+
+  let html = '';
+  if (offPlayers.length) {
+    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin:8px 2px 4px;">⚡ Offense</div>`;
+    html += offPlayers.map(playerRow).join('');
+  }
+  if (defPlayers.length) {
+    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#14532d; text-transform:uppercase; margin:${offPlayers.length ? '14px' : '8px'} 2px 4px;">🛡 Defense</div>`;
+    html += defPlayers.map(playerRow).join('');
+  }
+
+  container.innerHTML = html;
 }
 
 function addPlayer() {
