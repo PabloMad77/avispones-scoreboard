@@ -627,11 +627,11 @@ function renderPlayerList() {
 
   let html = '';
   if (offPlayers.length) {
-    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin:8px 2px 4px;">⚡ Offense</div>`;
+    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#b8860b; text-transform:uppercase; margin:8px 2px 4px;">Offense</div>`;
     html += offPlayers.map(playerRow).join('');
   }
   if (defPlayers.length) {
-    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#14532d; text-transform:uppercase; margin:${offPlayers.length ? '14px' : '8px'} 2px 4px;">🛡 Defense</div>`;
+    html += `<div style="font-family:'Oswald',sans-serif; font-size:12px; font-weight:700; letter-spacing:1px; color:#14532d; text-transform:uppercase; margin:${offPlayers.length ? '14px' : '8px'} 2px 4px;">Defense</div>`;
     html += defPlayers.map(playerRow).join('');
   }
 
