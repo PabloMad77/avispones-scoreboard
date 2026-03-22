@@ -740,24 +740,47 @@ function roundRect(ctx, x, y, w, h, r) {
 }
 
 function drawScoreCard(logo) {
+  // Layout constants
+  const logoSize = 280;
+  const logoY    = 60;           // top of logo area
+  const logoH    = logoSize;     // space reserved for logo/title
+  const cardY    = logoY + logoH + 30;
+  const cardH    = 420;
+  const cardPad  = 60;
+  const sepGap   = 54;           // gap between card bottom and separator line
+  const FOOTER_H = 170;          // footer text area
+  const PADDING  = 40;           // bottom breathing room before footer
+
+  const canvasH  = cardY + cardH + sepGap + FOOTER_H + PADDING;
+
   const canvas = document.createElement('canvas');
-  canvas.width = IG_W; canvas.height = IG_H;
+  canvas.width = IG_W; canvas.height = canvasH;
   const ctx = canvas.getContext('2d');
 
-  const bg = ctx.createLinearGradient(0,0,IG_W,IG_H);
+  // Background
+  const bg = ctx.createLinearGradient(0,0,IG_W,canvasH);
   bg.addColorStop(0,'#04200f'); bg.addColorStop(0.5,C.greenDark); bg.addColorStop(1,'#0d5c30');
-  ctx.fillStyle = bg; ctx.fillRect(0,0,IG_W,IG_H);
+  ctx.fillStyle = bg; ctx.fillRect(0,0,IG_W,canvasH);
 
+  // Diagonal accent stripe
   ctx.save(); ctx.globalAlpha=0.06; ctx.fillStyle=C.white;
-  ctx.beginPath(); ctx.moveTo(0,IG_H*0.55); ctx.lineTo(IG_W,IG_H*0.3);
-  ctx.lineTo(IG_W,IG_H*0.6); ctx.lineTo(0,IG_H*0.85); ctx.closePath(); ctx.fill(); ctx.restore();
+  ctx.beginPath();
+  ctx.moveTo(0,canvasH*0.5); ctx.lineTo(IG_W,canvasH*0.25);
+  ctx.lineTo(IG_W,canvasH*0.55); ctx.lineTo(0,canvasH*0.8);
+  ctx.closePath(); ctx.fill(); ctx.restore();
 
+  // Gold top bar
   ctx.fillStyle = C.gold; ctx.fillRect(0,0,IG_W,18);
 
-  if (logo) { drawLogo(ctx, logo, IG_W/2, 190, 280); }
-  else { ctx.fillStyle=C.gold; ctx.font='bold 110px Oswald,Arial'; ctx.textAlign='center'; ctx.fillText('AVISPONES',IG_W/2,155); }
+  // Logo / title
+  const logoCenterY = logoY + logoH / 2 + 10;
+  if (logo) { drawLogo(ctx, logo, IG_W/2, logoCenterY, logoSize); }
+  else {
+    ctx.fillStyle=C.gold; ctx.font='bold 110px Oswald,Arial';
+    ctx.textAlign='center'; ctx.fillText('AVISPONES',IG_W/2, logoY + 120);
+  }
 
-  const cardY=370, cardH=420, cardPad=60;
+  // Score cards
   const halfW=IG_W/2-cardPad, card1X=cardPad, card2X=IG_W/2+20, cardW=halfW-20;
 
   roundRect(ctx,card1X,cardY,cardW,cardH,28); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill();
@@ -766,26 +789,31 @@ function drawScoreCard(logo) {
   roundRect(ctx,card2X,cardY,cardW,cardH,28); ctx.fillStyle='rgba(255,255,255,0.07)'; ctx.fill();
   roundRect(ctx,card2X,cardY,cardW,cardH,28); ctx.strokeStyle='rgba(255,255,255,0.2)'; ctx.lineWidth=4; ctx.stroke();
 
+  // Team names
   ctx.fillStyle=C.gold; ctx.font='bold 44px Oswald,Arial'; ctx.textAlign='center';
   ctx.fillText('AVISPONES', card1X+cardW/2, cardY+72);
 
   const opponent = document.getElementById('opponentName').value.trim() || 'RIVAL';
   ctx.fillStyle=C.offwhite; ctx.fillText(opponent.toUpperCase(), card2X+cardW/2, cardY+72);
 
+  // Scores
   ctx.font='bold 220px Oswald,Arial'; ctx.fillStyle=C.white;
   ctx.fillText(String(avisponesScore), card1X+cardW/2, cardY+320);
   ctx.fillStyle='rgba(255,255,255,0.75)';
   ctx.fillText(String(opponentScore), card2X+cardW/2, cardY+320);
 
+  // VS pill
   const vsX=IG_W/2, vsY=cardY+cardH/2+10;
   ctx.fillStyle=C.gold; roundRect(ctx,vsX-42,vsY-46,84,70,35); ctx.fill();
-  ctx.fillStyle=C.black; ctx.font='bold 42px Oswald,Arial'; ctx.textAlign='center'; ctx.fillText('VS',vsX,vsY+14);
+  ctx.fillStyle=C.black; ctx.font='bold 42px Oswald,Arial'; ctx.textAlign='center';
+  ctx.fillText('VS',vsX,vsY+14);
 
+  // Separator line
   ctx.strokeStyle=C.gold; ctx.lineWidth=3; ctx.globalAlpha=0.4;
-  ctx.beginPath(); ctx.moveTo(80,cardY+cardH+54); ctx.lineTo(IG_W-80,cardY+cardH+54); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(80,cardY+cardH+sepGap); ctx.lineTo(IG_W-80,cardY+cardH+sepGap); ctx.stroke();
   ctx.globalAlpha=1;
 
-  drawFooter(ctx); return canvas;
+  drawFooter(ctx, canvasH); return canvas;
 }
 
 function drawStatsCard(logo) {
