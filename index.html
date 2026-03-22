@@ -789,13 +789,26 @@ function drawScoreCard(logo) {
 }
 
 function drawStatsCard(logo) {
+  // Pre-calculate row data first so we can size the canvas
+  const ROW_H=68, HEAD_H=58;
+  const offP=sortedByJersey(players.filter(p=>p.unit==='offense')).filter(p=>p.td>0||p.catch>0||p.xp>0);
+  const offRows=offP.length ? offP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.td,p.catch,p.xp]) : [['—','—','—','—','—']];
+  const defP=sortedByJersey(players.filter(p=>p.unit==='defense')).filter(p=>p.int>0||p.flag>0||p.sack>0||p.defTd>0);
+  const defRows=defP.length ? defP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.int,p.flag,p.sack,p.defTd]) : [['—','—','—','—','—','—','—']];
+
+  // Calculate total height needed: header(215) + off table + gap(90) + def table + footer(170) + padding(40)
+  function tblH(rows) { return 20 + HEAD_H + rows.length * ROW_H; }
+  const FOOTER_H = 170;
+  const neededH = 215 + 60 + tblH(offRows) + 90 + 60 + tblH(defRows) + FOOTER_H + 40;
+  const canvasH = Math.max(IG_H, neededH);
+
   const canvas = document.createElement('canvas');
-  canvas.width = IG_W; canvas.height = IG_H;
+  canvas.width = IG_W; canvas.height = canvasH;
   const ctx = canvas.getContext('2d');
 
-  const bg = ctx.createLinearGradient(0,0,IG_W,IG_H);
+  const bg = ctx.createLinearGradient(0,0,IG_W,canvasH);
   bg.addColorStop(0,'#04200f'); bg.addColorStop(1,'#0d5c30');
-  ctx.fillStyle=bg; ctx.fillRect(0,0,IG_W,IG_H);
+  ctx.fillStyle=bg; ctx.fillRect(0,0,IG_W,canvasH);
   ctx.fillStyle=C.gold; ctx.fillRect(0,0,IG_W,18);
 
   const TITLE_Y=140;
@@ -857,15 +870,10 @@ function drawStatsCard(logo) {
     return tableY+totalH;
   }
 
-  const offP=sortedByJersey(players.filter(p=>p.unit==='offense')).filter(p=>p.td>0||p.catch>0||p.xp>0);
-  const offRows=offP.length ? offP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.td,p.catch,p.xp]) : [['—','—','—','—','—']];
   let nextY=drawTable('OFFENSE',['#','Player','TD','CATCH','XP'],offRows,215);
-
-  const defP=sortedByJersey(players.filter(p=>p.unit==='defense')).filter(p=>p.int>0||p.flag>0||p.sack>0||p.defTd>0);
-  const defRows=defP.length ? defP.map(p=>[p.jersey?`#${p.jersey}`:'—',p.name,p.int,p.flag,p.sack,p.defTd]) : [['—','—','—','—','—','—','—']];
   drawTable('DEFENSE',['#','Player','INT','FLAG','SACK','SFT','TD'],defRows,nextY+90);
 
-  drawFooter(ctx); return canvas;
+  drawFooter(ctx, canvasH); return canvas;
 }
 
 function showPreview(canvas, filename) {
@@ -896,14 +904,15 @@ function getMetaInfo() {
   return { category, jornada, timestamp };
 }
 
-function drawFooter(ctx) {
+function drawFooter(ctx, h) {
+  h = h || IG_H;
   const { category, jornada, timestamp } = getMetaInfo();
-  ctx.fillStyle=C.gold; ctx.fillRect(0,IG_H-18,IG_W,18);
+  ctx.fillStyle=C.gold; ctx.fillRect(0,h-18,IG_W,18);
   ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='500 42px Oswald,Arial'; ctx.textAlign='center';
-  ctx.fillText('AVISPONES FLAG FOOTBALL',IG_W/2,IG_H-120);
+  ctx.fillText('AVISPONES FLAG FOOTBALL',IG_W/2,h-120);
   const metaLine=[category,jornada].filter(Boolean).join('  ·  ');
-  if (metaLine) { ctx.fillStyle=C.gold; ctx.font='bold 46px Oswald,Arial'; ctx.fillText(metaLine.toUpperCase(),IG_W/2,IG_H-70); }
-  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='400 36px Oswald,Arial'; ctx.fillText(timestamp,IG_W/2,IG_H-28);
+  if (metaLine) { ctx.fillStyle=C.gold; ctx.font='bold 46px Oswald,Arial'; ctx.fillText(metaLine.toUpperCase(),IG_W/2,h-70); }
+  ctx.fillStyle='rgba(255,255,255,0.55)'; ctx.font='400 36px Oswald,Arial'; ctx.fillText(timestamp,IG_W/2,h-28);
 }
 
 const LOGO_URL = 'https://raw.githubusercontent.com/PabloMad77/avispones-scoreboard/main/logo.PNG';
